@@ -2,7 +2,7 @@
 // Purpose: Builds the UIKit edit-menu entries for the composer runtime controls.
 // Layer: View Helper
 // Exports: TurnComposerRuntimeMenuBuilder
-// Depends on: UIKit, TurnComposerRuntimeState, TurnComposerRuntimeActions, CodexServiceTier
+// Depends on: UIKit, TurnComposerRuntimeState, TurnComposerRuntimeActions
 
 import UIKit
 
@@ -16,8 +16,6 @@ struct TurnComposerRuntimeMenuBuilder {
         if let reasoningMenu = makeReasoningMenu() {
             children.append(reasoningMenu)
         }
-
-        children.append(makeSpeedMenu())
 
         guard !children.isEmpty else {
             return nil
@@ -52,32 +50,4 @@ struct TurnComposerRuntimeMenuBuilder {
         )
     }
 
-    private func makeSpeedMenu() -> UIMenu {
-        var children: [UIMenuElement] = [
-            UIAction(
-                title: "Normal",
-                state: runtimeState.isSelectedServiceTier(nil) ? .on : .off
-            ) { _ in
-                runtimeActions.selectServiceTier(nil)
-            },
-        ]
-
-        children.append(
-            contentsOf: CodexServiceTier.allCases.map { serviceTier in
-                UIAction(
-                    title: serviceTier.displayName,
-                    image: UIImage(systemName: serviceTier.iconName),
-                    state: runtimeState.isSelectedServiceTier(serviceTier) ? .on : .off
-                ) { _ in
-                    runtimeActions.selectServiceTier(serviceTier)
-                }
-            }
-        )
-
-        return UIMenu(
-            title: "Speed",
-            image: UIImage(systemName: "bolt.fill"),
-            children: children
-        )
-    }
 }

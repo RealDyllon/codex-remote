@@ -194,24 +194,29 @@ struct ComposerBottomBar: View {
 
     private var modelMenu: some View {
         Menu {
-            Text("Select model")
-            if isLoadingModels {
-                Text("Loading models...")
-            } else if orderedModelOptions.isEmpty {
-                Text("No models available")
-            } else {
-                ForEach(orderedModelOptions, id: \.id) { model in
-                    Button {
-                        HapticFeedback.shared.triggerImpactFeedback(style: .light)
-                        runtimeActions.selectModel(model.id)
-                    } label: {
-                        if selectedModelID == model.id {
-                            Label(TurnComposerMetaMapper.modelTitle(for: model), systemImage: "checkmark")
-                        } else {
-                            Text(TurnComposerMetaMapper.modelTitle(for: model))
+            Section("Model") {
+                if isLoadingModels {
+                    Text("Loading models...")
+                } else if orderedModelOptions.isEmpty {
+                    Text("No models available")
+                } else {
+                    ForEach(orderedModelOptions, id: \.id) { model in
+                        Button {
+                            HapticFeedback.shared.triggerImpactFeedback(style: .light)
+                            runtimeActions.selectModel(model.id)
+                        } label: {
+                            if selectedModelID == model.id {
+                                Label(TurnComposerMetaMapper.modelTitle(for: model), systemImage: "checkmark")
+                            } else {
+                                Text(TurnComposerMetaMapper.modelTitle(for: model))
+                            }
                         }
                     }
                 }
+            }
+
+            Section {
+                speedSubmenu
             }
         } label: {
             composerMenuLabel(
@@ -245,32 +250,6 @@ struct ComposerBottomBar: View {
                     }
                 }
             }
-
-            Section("Speed") {
-                Button {
-                    HapticFeedback.shared.triggerImpactFeedback(style: .light)
-                    runtimeActions.selectServiceTier(nil)
-                } label: {
-                    if runtimeState.isSelectedServiceTier(nil) {
-                        Label("Normal", systemImage: "checkmark")
-                    } else {
-                        Text("Normal")
-                    }
-                }
-
-                ForEach(CodexServiceTier.allCases, id: \.rawValue) { tier in
-                    Button {
-                        HapticFeedback.shared.triggerImpactFeedback(style: .light)
-                        runtimeActions.selectServiceTier(tier)
-                    } label: {
-                        if runtimeState.isSelectedServiceTier(tier) {
-                            Label(tier.displayName, systemImage: "checkmark")
-                        } else {
-                            Text(tier.displayName)
-                        }
-                    }
-                }
-            }
         } label: {
             composerMenuLabel(
                 title: runtimeState.selectedReasoningTitle,
@@ -281,6 +260,36 @@ struct ComposerBottomBar: View {
         .fixedSize(horizontal: true, vertical: false)
         .layoutPriority(1)
         .tint(metaLabelColor)
+    }
+
+    private var speedSubmenu: some View {
+        Menu {
+            Button {
+                HapticFeedback.shared.triggerImpactFeedback(style: .light)
+                runtimeActions.selectServiceTier(nil)
+            } label: {
+                if runtimeState.isSelectedServiceTier(nil) {
+                    Label("Normal", systemImage: "checkmark")
+                } else {
+                    Text("Normal")
+                }
+            }
+
+            ForEach(CodexServiceTier.allCases, id: \.rawValue) { tier in
+                Button {
+                    HapticFeedback.shared.triggerImpactFeedback(style: .light)
+                    runtimeActions.selectServiceTier(tier)
+                } label: {
+                    if runtimeState.isSelectedServiceTier(tier) {
+                        Label(tier.displayName, systemImage: "checkmark")
+                    } else {
+                        Text(tier.displayName)
+                    }
+                }
+            }
+        } label: {
+            Label("Speed", systemImage: "bolt.fill")
+        }
     }
 
     private var planModeIndicator: some View {
