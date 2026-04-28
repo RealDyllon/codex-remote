@@ -74,7 +74,13 @@ enum SidebarThreadGrouping {
             )
         }
 
-        groups.append(contentsOf: makeProjectGroups(from: threads, excludingPinnedThreadIDs: pinnedThreadIDSet))
+        groups.append(
+            contentsOf: makeProjectGroups(
+                from: threads,
+                excludingPinnedThreadIDs: pinnedThreadIDSet,
+                collapseManagedWorktreesIntoProjectSections: true
+            )
+        )
 
         let sortedArchived = sortThreadsByRecentActivity(archivedThreads)
         if let firstArchived = sortedArchived.first {
@@ -93,9 +99,9 @@ enum SidebarThreadGrouping {
         return groups
     }
 
-    // Reuses the sidebar project grouping rules for places like the New Chat chooser.
+    // Keeps project choices path-specific so the New Chat chooser can still target an existing worktree.
     static func makeProjectChoices(from threads: [CodexThread]) -> [SidebarProjectChoice] {
-        makeProjectGroups(from: threads).compactMap { group in
+        makeProjectGroups(from: threads, collapseManagedWorktreesIntoProjectSections: false).compactMap { group in
             guard let projectPath = group.projectPath else {
                 return nil
             }
@@ -118,21 +124,32 @@ enum SidebarThreadGrouping {
 
         return sortThreadsByRecentActivity(
             threads.filter { thread in
-                thread.syncState != .archivedLocal && projectGroupID(for: thread) == group.id
+                thread.syncState != .archivedLocal && projectGroupID(for: thread, in: threads) == group.id
             }
         ).map(\.id)
     }
 
-    private static func makeProjectGroup(projectKey: String, threads: [CodexThread]) -> SidebarThreadGroup {
+    private static func makeProjectGroup(
+        projectKey: String,
+        threads: [CodexThread],
+        collapseManagedWorktreesIntoProjectSections: Bool
+    ) -> SidebarThreadGroup {
         let sortedThreads = sortThreadsByRecentActivity(threads)
         let representativeThread = sortedThreads.first
+        let projectPath = representativeProjectPath(
+            from: sortedThreads,
+            collapseManagedWorktreesIntoProjectSections: collapseManagedWorktreesIntoProjectSections
+        )
         let sortDate = representativeThread?.updatedAt ?? representativeThread?.createdAt ?? .distantPast
         return SidebarThreadGroup(
             id: "project:\(projectKey)",
-            label: representativeThread?.projectDisplayName ?? "Cloud",
+            label: projectDisplayLabel(
+                for: projectPath,
+                includeWorktreeToken: !collapseManagedWorktreesIntoProjectSections
+            ),
             kind: .project,
             sortDate: sortDate,
-            projectPath: representativeThread?.normalizedProjectPath,
+            projectPath: projectPath,
             threads: sortedThreads
         )
     }
@@ -140,19 +157,31 @@ enum SidebarThreadGrouping {
     // Keeps project-derived UI consistent by centralizing the live-thread → project bucket mapping.
     private static func makeProjectGroups(
         from threads: [CodexThread],
-        excludingPinnedThreadIDs pinnedThreadIDs: Set<String> = []
+        excludingPinnedThreadIDs pinnedThreadIDs: Set<String> = [],
+        collapseManagedWorktreesIntoProjectSections: Bool = true
     ) -> [SidebarThreadGroup] {
         var liveThreadsByProject: [String: [CodexThread]] = [:]
+        let liveThreads = threads.filter { $0.syncState != .archivedLocal }
+        let candidateThreads = threads.filter { thread in
+            thread.syncState != .archivedLocal && !pinnedThreadIDs.contains(thread.id)
+        }
+        let mainProjectKeyByBaseName = uniqueMainProjectKeyByBaseName(from: liveThreads)
 
-        for thread in threads where thread.syncState != .archivedLocal {
-            guard !pinnedThreadIDs.contains(thread.id) else {
-                continue
-            }
-            liveThreadsByProject[thread.projectKey, default: []].append(thread)
+        for thread in candidateThreads {
+            let projectKey = projectGroupKey(
+                for: thread,
+                mainProjectKeyByBaseName: mainProjectKeyByBaseName,
+                collapseManagedWorktreesIntoProjectSections: collapseManagedWorktreesIntoProjectSections
+            )
+            liveThreadsByProject[projectKey, default: []].append(thread)
         }
 
         return liveThreadsByProject.map { projectKey, projectThreads in
-            makeProjectGroup(projectKey: projectKey, threads: projectThreads)
+            makeProjectGroup(
+                projectKey: projectKey,
+                threads: projectThreads,
+                collapseManagedWorktreesIntoProjectSections: collapseManagedWorktreesIntoProjectSections
+            )
         }
         .sorted { lhs, rhs in
             if lhs.sortDate != rhs.sortDate {
@@ -232,7 +261,80 @@ enum SidebarThreadGrouping {
         }
     }
 
-    private static func projectGroupID(for thread: CodexThread) -> String {
-        "project:\(thread.projectKey)"
+    private static func projectGroupID(for thread: CodexThread, in threads: [CodexThread]) -> String {
+        let liveThreads = threads.filter { $0.syncState != .archivedLocal }
+        let mainProjectKeyByBaseName = uniqueMainProjectKeyByBaseName(from: liveThreads)
+        let projectKey = projectGroupKey(
+            for: thread,
+            mainProjectKeyByBaseName: mainProjectKeyByBaseName,
+            collapseManagedWorktreesIntoProjectSections: true
+        )
+        return "project:\(projectKey)"
+    }
+
+    private static func projectGroupKey(
+        for thread: CodexThread,
+        mainProjectKeyByBaseName: [String: String],
+        collapseManagedWorktreesIntoProjectSections: Bool
+    ) -> String {
+        guard collapseManagedWorktreesIntoProjectSections,
+              thread.isManagedWorktreeProject,
+              let normalizedProjectPath = thread.normalizedProjectPath else {
+            return thread.projectKey
+        }
+
+        let baseName = projectBaseDisplayName(for: normalizedProjectPath)
+        return mainProjectKeyByBaseName[baseName] ?? "managed-worktree:\(baseName)"
+    }
+
+    private static func uniqueMainProjectKeyByBaseName(from threads: [CodexThread]) -> [String: String] {
+        var projectKeysByBaseName: [String: Set<String>] = [:]
+
+        for thread in threads where !thread.isManagedWorktreeProject {
+            guard let normalizedProjectPath = thread.normalizedProjectPath else {
+                continue
+            }
+            projectKeysByBaseName[projectBaseDisplayName(for: normalizedProjectPath), default: []].insert(thread.projectKey)
+        }
+
+        return projectKeysByBaseName.reduce(into: [String: String]()) { result, entry in
+            guard entry.value.count == 1, let projectKey = entry.value.first else {
+                return
+            }
+            result[entry.key] = projectKey
+        }
+    }
+
+    private static func representativeProjectPath(
+        from sortedThreads: [CodexThread],
+        collapseManagedWorktreesIntoProjectSections: Bool
+    ) -> String? {
+        if collapseManagedWorktreesIntoProjectSections,
+           let mainProjectPath = sortedThreads.first(where: { !$0.isManagedWorktreeProject })?.normalizedProjectPath {
+            return mainProjectPath
+        }
+
+        return sortedThreads.first?.normalizedProjectPath
+    }
+
+    private static func projectDisplayLabel(for normalizedProjectPath: String?, includeWorktreeToken: Bool) -> String {
+        guard let normalizedProjectPath else {
+            return "No Project"
+        }
+
+        if includeWorktreeToken {
+            return CodexThread.projectDisplayLabel(for: normalizedProjectPath)
+        }
+
+        return projectBaseDisplayName(for: normalizedProjectPath)
+    }
+
+    private static func projectBaseDisplayName(for normalizedProjectPath: String) -> String {
+        let lastComponent = (normalizedProjectPath as NSString).lastPathComponent
+        if !lastComponent.isEmpty, lastComponent != "/" {
+            return lastComponent
+        }
+
+        return normalizedProjectPath
     }
 }
