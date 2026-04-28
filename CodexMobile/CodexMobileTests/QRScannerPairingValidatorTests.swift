@@ -20,9 +20,9 @@ final class QRScannerPairingValidatorTests: XCTestCase {
             return XCTFail("Expected a bridge update prompt for mismatched QR versions.")
         }
 
-        XCTAssertEqual(prompt.title, "Update Remodex on your Mac before scanning")
-        XCTAssertEqual(prompt.command, "npm install -g remodex@latest")
-        XCTAssertTrue(prompt.message.contains("different Remodex npm version"))
+        XCTAssertEqual(prompt.title, "Update Codex Remote on your Mac before scanning")
+        XCTAssertEqual(prompt.command, "npm install -g codex-remote@latest")
+        XCTAssertTrue(prompt.message.contains("different Codex Remote npm version"))
     }
 
     func testLegacyBridgePayloadRequiresBridgeUpdateBeforeScanning() {
@@ -34,8 +34,8 @@ final class QRScannerPairingValidatorTests: XCTestCase {
             return XCTFail("Expected a bridge update prompt for legacy pairing payloads.")
         }
 
-        XCTAssertEqual(prompt.command, "npm install -g remodex@latest")
-        XCTAssertTrue(prompt.message.contains("older Remodex bridge"))
+        XCTAssertEqual(prompt.command, "npm install -g codex-remote@latest")
+        XCTAssertTrue(prompt.message.contains("older Codex Remote bridge"))
     }
 
     func testValidPayloadReturnsSuccess() {
@@ -67,7 +67,7 @@ final class QRScannerPairingValidatorTests: XCTestCase {
             .replacingOccurrences(of: "=", with: "")
 
         let result = validatePairingQRCode(
-            "RMX1:\(encoded)",
+            "CRX1:\(encoded)",
             now: Date(timeIntervalSince1970: 1_800_000_000)
         )
 

@@ -659,7 +659,7 @@ private struct SettingsBridgeVersionCard: View {
         }
 
         if installedVersion.compare(latestVersion, options: .numeric) == .orderedAscending {
-            return "A newer Remodex package is available on npm."
+            return "A newer Codex Remote package is available on npm."
         }
 
         return "This Mac is running a different build than the current npm latest."
@@ -780,7 +780,7 @@ private struct SettingsAboutCard: View {
                 isShowingAbout = true
             } label: {
                 settingsAccessoryRow(
-                    title: "How Remodex Works",
+                    title: "How Codex Remote Works",
                     leading: {
                         Image(systemName: "info.circle")
                             .font(AppFont.subheadline(weight: .medium))
@@ -837,7 +837,7 @@ private struct SettingsAboutCard: View {
             .buttonStyle(.plain)
         }
         .fullScreenCover(isPresented: $isShowingAbout) {
-            AboutRemodexView()
+            AboutCodexRemoteView()
         }
     }
 

@@ -101,7 +101,7 @@ enum TurnMessageRegexCache {
 // reference instead of copied terminal syntax such as `@scope/pkg:build`.
 enum TurnFileMentionHeuristics {
     // Keeps common extensionless files mentionable without reopening the door to arbitrary
-    // terminal handles such as `@workspace` or `@remodex`.
+    // terminal handles such as `@workspace` or `@codex-remote`.
     private static let allowedExtensionlessFileNames: Set<String> = [
         ".env",
         ".env.example",

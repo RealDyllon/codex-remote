@@ -72,7 +72,7 @@ struct BridgeUpdateSheet: View {
                                 .fill(Color(.tertiarySystemFill).opacity(0.75))
                         )
                     } else {
-                        Text("Install the latest Remodex build on this iPhone, then come back here and reconnect.")
+                        Text("Install the latest Codex Remote build on this iPhone, then come back here and reconnect.")
                             .font(AppFont.body())
                             .foregroundStyle(.secondary)
                     }

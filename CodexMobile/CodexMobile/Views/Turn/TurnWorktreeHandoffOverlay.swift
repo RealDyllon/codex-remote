@@ -22,7 +22,7 @@ enum TurnWorktreeOverlayMode {
     var message: String {
         switch self {
         case .handoff:
-            return "Create and check out a branch in a new worktree to continue in parallel. The branch is normalized with the remodex/ prefix."
+            return "Create and check out a branch in a new worktree to continue in parallel. The branch is normalized with the codex-remote/ prefix."
         case .fork:
             return "Create and check out a branch in a new worktree, then fork this conversation into that checkout as a new chat."
         }
@@ -51,7 +51,7 @@ struct TurnWorktreeHandoffOverlay: View {
     @FocusState private var isBranchNameFocused: Bool
 
     private var normalizedBranchName: String {
-        remodexNormalizedCreatedBranchName(branchName)
+        codexRemoteNormalizedCreatedBranchName(branchName)
     }
 
     private var trimmedBaseBranch: String {

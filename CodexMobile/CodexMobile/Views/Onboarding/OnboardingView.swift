@@ -31,7 +31,7 @@ struct OnboardingView: View {
                         stepNumber: 1,
                         icon: "terminal",
                         title: "Install Codex CLI",
-                        description: "The AI coding agent that lives in your terminal. Remodex connects to it from your iPhone.",
+                        description: "The AI coding agent that lives in your terminal. Codex Remote connects to it from your iPhone.",
                         command: codexInstallCommand
                     )
                     .tag(2)
@@ -41,8 +41,8 @@ struct OnboardingView: View {
                         icon: "link",
                         title: "Install the Bridge",
                         description: "A lightweight relay that securely connects your Mac to your iPhone.",
-                        command: "npm install -g remodex@latest",
-                        commandCaption: "Remodex can keep your Mac awake with macOS caffeinate while the bridge is running, but it starts disabled by default. You can enable it later in Settings if you want."
+                        command: "npm install -g codex-remote@latest",
+                        commandCaption: "Codex Remote can keep your Mac awake with macOS caffeinate while the bridge is running, but it starts disabled by default. You can enable it later in Settings if you want."
                     )
                     .tag(3)
 
@@ -51,7 +51,7 @@ struct OnboardingView: View {
                         icon: "qrcode.viewfinder",
                         title: "Start Pairing",
                         description: "Run this on your computer. A QR code will appear in your terminal — scan it next.",
-                        command: "remodex up"
+                        command: "codex-remote up"
                     )
                     .tag(4)
                 }
@@ -67,7 +67,7 @@ struct OnboardingView: View {
                 advanceToNextPage()
             }
         } message: {
-            Text("Copy and paste \"\(codexInstallCommand)\" on your computer before moving on. Remodex will not work until Codex CLI is installed and available in your PATH.")
+            Text("Copy and paste \"\(codexInstallCommand)\" on your computer before moving on. Codex Remote will not work until Codex CLI is installed and available in your PATH.")
         }
     }
 

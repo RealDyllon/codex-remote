@@ -593,7 +593,7 @@ private extension WorktreeFlowCoordinator {
         case .invalidInput(let reason):
             let normalizedReason = reason.lowercased()
             if normalizedReason.contains("does not support native thread forks yet")
-                || normalizedReason.contains("update remodex on your mac")
+                || normalizedReason.contains("update codex-remote on your mac")
                 || normalizedReason.contains("thread not found")
                 || normalizedReason.contains("source thread id is required") {
                 return .cleanupSafe

@@ -112,7 +112,7 @@ struct OnboardingStepPage: View {
             stepNumber: 1,
             icon: "terminal",
             title: "Install Codex CLI",
-            description: "The AI coding agent that lives in your terminal. Remodex connects to it from your iPhone.",
+            description: "The AI coding agent that lives in your terminal. Codex Remote connects to it from your iPhone.",
             command: "npm install -g @openai/codex@latest"
         )
     }
@@ -127,8 +127,8 @@ struct OnboardingStepPage: View {
             icon: "link",
             title: "Install the Bridge",
             description: "A lightweight relay that securely connects your Mac to your iPhone.",
-            command: "npm install -g remodex@latest",
-            commandCaption: "Remodex can keep your Mac awake with macOS caffeinate while the bridge is running, but it starts disabled by default. You can enable it later in Settings if you want."
+            command: "npm install -g codex-remote@latest",
+            commandCaption: "Codex Remote can keep your Mac awake with macOS caffeinate while the bridge is running, but it starts disabled by default. You can enable it later in Settings if you want."
         )
     }
     .preferredColorScheme(.dark)
@@ -142,7 +142,7 @@ struct OnboardingStepPage: View {
             icon: "qrcode.viewfinder",
             title: "Start Pairing",
             description: "Run this on your computer. A QR code will appear in your terminal — scan it next.",
-            command: "remodex up"
+            command: "codex-remote up"
         )
     }
     .preferredColorScheme(.dark)

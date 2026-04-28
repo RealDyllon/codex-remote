@@ -196,7 +196,7 @@ private extension DesktopHandoffError {
         case "saved_pair_required":
             return fallback ?? "Reconnect to your paired computer or scan a new QR code first."
         case "unsupported_bridge_preferences":
-            return fallback ?? "Update the Remodex bridge on your computer to sync this setting."
+            return fallback ?? "Update the Codex Remote bridge on your computer to sync this setting."
         case "invalid_bridge_preferences":
             return fallback ?? "The computer bridge rejected this setting update."
         case "bridge_preferences_persist_failed":

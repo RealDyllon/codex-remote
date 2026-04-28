@@ -1,5 +1,5 @@
 // FILE: relay.js
-// Purpose: Thin self-hostable WebSocket relay for Remodex pairing, trusted-session lookup, and encrypted forwarding.
+// Purpose: Thin self-hostable WebSocket relay for Codex Remote pairing, trusted-session lookup, and encrypted forwarding.
 // Layer: Standalone server module
 // Exports: setupRelay, getRelayStats, hasActiveMacSession, hasAuthenticatedMacSession, resolveTrustedMacSession, resolvePairingCode
 
@@ -12,7 +12,7 @@ const CLOSE_CODE_SESSION_UNAVAILABLE = 4002;
 const CLOSE_CODE_IPHONE_REPLACED = 4003;
 const CLOSE_CODE_MAC_ABSENCE_BUFFER_FULL = 4004;
 const MAC_ABSENCE_GRACE_MS = 15_000;
-const TRUSTED_SESSION_RESOLVE_TAG = "remodex-trusted-session-resolve-v1";
+const TRUSTED_SESSION_RESOLVE_TAG = "codex-remote-trusted-session-resolve-v1";
 const TRUSTED_SESSION_RESOLVE_SKEW_MS = 90_000;
 const SHORT_PAIRING_CODE_MIN_LENGTH = 8;
 const SHORT_PAIRING_CODE_MAX_LENGTH = 12;

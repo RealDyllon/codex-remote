@@ -1,5 +1,5 @@
 // FILE: push-service.js
-// Purpose: Stores session-scoped APNs registration state and sends completion pushes for relay-hosted Remodex sessions.
+// Purpose: Stores session-scoped APNs registration state and sends completion pushes for relay-hosted Codex Remote sessions.
 // Layer: Hosted service helper
 // Exports: createPushSessionService, createFileBackedPushStateStore, resolvePushStateFilePath
 // Depends on: crypto, fs, os, path, ./apns-client
@@ -253,21 +253,21 @@ function createFileBackedPushStateStore({ stateFilePath } = {}) {
 
 function apnsConfigFromEnv(env) {
   return {
-    teamId: readFirstDefinedEnv(["REMODEX_APNS_TEAM_ID", "PHODEX_APNS_TEAM_ID"], env),
-    keyId: readFirstDefinedEnv(["REMODEX_APNS_KEY_ID", "PHODEX_APNS_KEY_ID"], env),
-    bundleId: readFirstDefinedEnv(["REMODEX_APNS_BUNDLE_ID", "PHODEX_APNS_BUNDLE_ID"], env),
+    teamId: readFirstDefinedEnv(["CODEX_REMOTE_APNS_TEAM_ID"], env),
+    keyId: readFirstDefinedEnv(["CODEX_REMOTE_APNS_KEY_ID"], env),
+    bundleId: readFirstDefinedEnv(["CODEX_REMOTE_APNS_BUNDLE_ID"], env),
     privateKey: readAPNsPrivateKey(env),
   };
 }
 
 function readAPNsPrivateKey(env) {
-  const rawValue = readFirstDefinedEnv(["REMODEX_APNS_PRIVATE_KEY", "PHODEX_APNS_PRIVATE_KEY"], env);
+  const rawValue = readFirstDefinedEnv(["CODEX_REMOTE_APNS_PRIVATE_KEY"], env);
   if (rawValue) {
     return rawValue;
   }
 
   const filePath = readFirstDefinedEnv(
-    ["REMODEX_APNS_PRIVATE_KEY_FILE", "PHODEX_APNS_PRIVATE_KEY_FILE"],
+    ["CODEX_REMOTE_APNS_PRIVATE_KEY_FILE"],
     env
   );
   if (!filePath) {
@@ -317,7 +317,7 @@ function fallbackBodyForResult(result) {
 
 function resolvePushStateFilePath(env = process.env) {
   const explicitPath = readFirstDefinedEnv(
-    ["REMODEX_PUSH_STATE_FILE", "PHODEX_PUSH_STATE_FILE"],
+    ["CODEX_REMOTE_PUSH_STATE_FILE"],
     env
   );
   if (explicitPath) {
@@ -325,7 +325,7 @@ function resolvePushStateFilePath(env = process.env) {
   }
 
   const codexHome = readString(env.CODEX_HOME) || path.join(os.homedir(), ".codex");
-  return path.join(codexHome, "remodex", "push-state.json");
+  return path.join(codexHome, "codex-remote", "push-state.json");
 }
 
 function normalizeEntryList(value) {

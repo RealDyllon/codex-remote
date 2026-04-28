@@ -7,7 +7,7 @@ This repo is local-first now. Do not reintroduce hosted-service assumptions, rem
 ## Repository ownership guardrails
 
 - Treat `RealDyllon/codex-remote` and its `origin` remote as the only GitHub repository an agent may write to for this workspace.
-- Never push branches, create pull requests, edit pull requests, close pull requests, open issues, comment on issues, or otherwise mutate state on the upstream/root repository (`Emanuele-web04/remodex`) unless the user explicitly names that repository and gives direct permission in the same turn.
+- Never push branches, create pull requests, edit pull requests, close pull requests, open issues, comment on issues, or otherwise mutate state on any upstream/root repository outside `RealDyllon/codex-remote` unless the user explicitly names that repository and gives direct permission in the same turn.
 - Do not use `upstream` as a PR target by default. If a PR is requested, create it against the user's fork (`origin`) unless the user explicitly says otherwise.
 - It is safe to fetch from or compare against upstream for read-only context when needed, but do not perform write operations against upstream.
 - Before any GitHub mutation, verify the target owner/repo and state it in the chat. If the target is not under the user's account/fork, stop and ask for explicit confirmation.
@@ -55,6 +55,6 @@ This repo is local-first now. Do not reintroduce hosted-service assumptions, rem
 ## Local quick runbook
 
 ```bash
-cd phodex-bridge
+cd codex-remote-bridge
 npm start
 ```

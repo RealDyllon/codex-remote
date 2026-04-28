@@ -4,11 +4,11 @@ on:
   push:
     paths:
       - ".github/workflows/bridge-check.yml"
-      - "phodex-bridge/**"
+      - "codex-remote-bridge/**"
   pull_request:
     paths:
       - ".github/workflows/bridge-check.yml"
-      - "phodex-bridge/**"
+      - "codex-remote-bridge/**"
 
 jobs:
   bridge-check:
@@ -23,13 +23,13 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: phodex-bridge/package-lock.json
+          cache-dependency-path: codex-remote-bridge/package-lock.json
 
       - name: Install bridge dependencies
-        working-directory: phodex-bridge
+        working-directory: codex-remote-bridge
         run: npm ci
 
       - name: Verify bridge entrypoints load
-        working-directory: phodex-bridge
+        working-directory: codex-remote-bridge
         run: |
           node -e "const mod = require('./src'); const names = ['startBridge', 'openLastActiveThread', 'watchThreadRollout']; for (const name of names) { if (typeof mod[name] !== 'function') { throw new Error('Missing export: ' + name); } }"

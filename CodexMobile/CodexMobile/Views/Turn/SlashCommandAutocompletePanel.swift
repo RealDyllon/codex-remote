@@ -273,7 +273,7 @@ struct SlashCommandAutocompletePanel: View {
             return trimmedSelected
         }
 
-        return remodexSelectableDefaultBranch(
+        return codexRemoteSelectableDefaultBranch(
             defaultBranch: gitDefaultBranch,
             availableGitBranchTargets: availableGitBranchTargets
         )

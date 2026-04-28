@@ -39,7 +39,7 @@ final class CodexThreadForkTests: XCTestCase {
                     result: .object([
                         "thread": .object([
                             "id": .string("fork-local"),
-                            "cwd": .string("/tmp/remodex-worktree"),
+                            "cwd": .string("/tmp/codex-remote-worktree"),
                             "title": .string("Fork Local"),
                         ]),
                     ]),
@@ -51,7 +51,7 @@ final class CodexThreadForkTests: XCTestCase {
                     result: .object([
                         "thread": .object([
                             "id": .string("fork-local"),
-                            "cwd": .string("/tmp/remodex-worktree"),
+                            "cwd": .string("/tmp/codex-remote-worktree"),
                             "turns": .array([]),
                         ]),
                     ]),
@@ -65,15 +65,15 @@ final class CodexThreadForkTests: XCTestCase {
 
         let forkedThread = try await service.forkThreadIfReady(
             from: "source-thread",
-            target: .projectPath("/tmp/remodex-worktree")
+            target: .projectPath("/tmp/codex-remote-worktree")
         )
 
         XCTAssertEqual(capturedForkParams["threadId"]?.stringValue, "source-thread")
         XCTAssertEqual(capturedForkParams.count, 1)
         XCTAssertEqual(capturedResumeParams["threadId"]?.stringValue, "fork-local")
-        XCTAssertEqual(capturedResumeParams["cwd"]?.stringValue, "/tmp/remodex-worktree")
+        XCTAssertEqual(capturedResumeParams["cwd"]?.stringValue, "/tmp/codex-remote-worktree")
         XCTAssertEqual(forkedThread.id, "fork-local")
-        XCTAssertEqual(forkedThread.gitWorkingDirectory, "/tmp/remodex-worktree")
+        XCTAssertEqual(forkedThread.gitWorkingDirectory, "/tmp/codex-remote-worktree")
         XCTAssertEqual(service.activeThreadId, "fork-local")
     }
 
@@ -101,7 +101,7 @@ final class CodexThreadForkTests: XCTestCase {
                     result: .object([
                         "thread": .object([
                             "id": .string("fork-local"),
-                            "cwd": .string("/tmp/remodex"),
+                            "cwd": .string("/tmp/codex-remote"),
                             "title": .string("Fork Local"),
                         ]),
                     ]),
@@ -113,7 +113,7 @@ final class CodexThreadForkTests: XCTestCase {
                     result: .object([
                         "thread": .object([
                             "id": .string("fork-local"),
-                            "cwd": .string("/tmp/remodex"),
+                            "cwd": .string("/tmp/codex-remote"),
                             "turns": .array([]),
                         ]),
                     ]),
@@ -163,7 +163,7 @@ final class CodexThreadForkTests: XCTestCase {
                     result: .object([
                         "thread": .object([
                             "id": .string("fork-local"),
-                            "cwd": .string("/tmp/remodex"),
+                            "cwd": .string("/tmp/codex-remote"),
                             "title": .string("Fork Local"),
                         ]),
                     ]),
@@ -175,7 +175,7 @@ final class CodexThreadForkTests: XCTestCase {
                     result: .object([
                         "thread": .object([
                             "id": .string("fork-local"),
-                            "cwd": .string("/tmp/remodex"),
+                            "cwd": .string("/tmp/codex-remote"),
                             "turns": .array([]),
                         ]),
                     ]),
@@ -194,7 +194,7 @@ final class CodexThreadForkTests: XCTestCase {
             CodexThread(
                 id: "fork-local",
                 title: "Fork Local",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             )
         )
 
@@ -220,7 +220,7 @@ final class CodexThreadForkTests: XCTestCase {
             XCTFail("Expected thread/fork to fail")
         } catch {
             XCTAssertFalse(service.supportsThreadFork)
-            XCTAssertEqual(service.bridgeUpdatePrompt?.title, "Update Remodex on your Mac to use /fork")
+            XCTAssertEqual(service.bridgeUpdatePrompt?.title, "Update Codex Remote on your Mac to use /fork")
         }
     }
 
@@ -254,34 +254,34 @@ final class CodexThreadForkTests: XCTestCase {
 
         let forkedThread = try await service.forkThreadIfReady(
             from: "source-thread",
-            target: .projectPath("/tmp/remodex-worktree")
+            target: .projectPath("/tmp/codex-remote-worktree")
         )
 
-        XCTAssertEqual(forkedThread.gitWorkingDirectory, "/tmp/remodex-worktree")
-        XCTAssertEqual(service.currentAuthoritativeProjectPath(for: "fork-local"), "/tmp/remodex-worktree")
+        XCTAssertEqual(forkedThread.gitWorkingDirectory, "/tmp/codex-remote-worktree")
+        XCTAssertEqual(service.currentAuthoritativeProjectPath(for: "fork-local"), "/tmp/codex-remote-worktree")
 
         service.upsertThread(
             CodexThread(
                 id: "fork-local",
                 title: "Fork Local",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
             treatAsServerState: true
         )
 
-        XCTAssertEqual(service.thread(for: "fork-local")?.gitWorkingDirectory, "/tmp/remodex-worktree")
-        XCTAssertEqual(service.currentAuthoritativeProjectPath(for: "fork-local"), "/tmp/remodex-worktree")
+        XCTAssertEqual(service.thread(for: "fork-local")?.gitWorkingDirectory, "/tmp/codex-remote-worktree")
+        XCTAssertEqual(service.currentAuthoritativeProjectPath(for: "fork-local"), "/tmp/codex-remote-worktree")
 
         service.upsertThread(
             CodexThread(
                 id: "fork-local",
                 title: "Fork Local",
-                cwd: "/tmp/remodex-worktree"
+                cwd: "/tmp/codex-remote-worktree"
             ),
             treatAsServerState: true
         )
 
-        XCTAssertEqual(service.thread(for: "fork-local")?.gitWorkingDirectory, "/tmp/remodex-worktree")
+        XCTAssertEqual(service.thread(for: "fork-local")?.gitWorkingDirectory, "/tmp/codex-remote-worktree")
         XCTAssertNil(service.currentAuthoritativeProjectPath(for: "fork-local"))
     }
 
@@ -289,7 +289,7 @@ final class CodexThreadForkTests: XCTestCase {
         let tempRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         let worktreePath = tempRoot
-            .appendingPathComponent(".codex/worktrees/a8b4/phodex-website", isDirectory: true)
+            .appendingPathComponent(".codex/worktrees/a8b4/codex-remote-website", isDirectory: true)
 
         try? FileManager.default.createDirectory(at: worktreePath, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tempRoot) }
@@ -329,7 +329,7 @@ final class CodexThreadForkTests: XCTestCase {
         CodexThread(
             id: "source-thread",
             title: "Source",
-            cwd: "/tmp/remodex",
+            cwd: "/tmp/codex-remote",
             model: "gpt-5.4",
             modelProvider: "openai"
         )

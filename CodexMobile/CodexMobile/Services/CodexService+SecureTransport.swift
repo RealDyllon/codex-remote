@@ -70,10 +70,10 @@ extension CodexService {
         )
         guard serverHello.protocolVersion == codexSecureProtocolVersion else {
             presentBridgeUpdatePrompt(
-                message: "This bridge is using a different secure transport version. Update the Remodex package on your computer and try again."
+                message: "This bridge is using a different secure transport version. Update the Codex Remote package on your computer and try again."
             )
             throw CodexSecureTransportError.incompatibleVersion(
-                "This bridge is using a different secure transport version. Update Remodex on the iPhone or Mac and try again."
+                "This bridge is using a different secure transport version. Update Codex Remote on the iPhone or Mac and try again."
             )
         }
         guard serverHello.sessionId == sessionId else {
@@ -225,7 +225,7 @@ extension CodexService {
     func secureWireText(for plaintext: String) throws -> String {
         guard var secureSession else {
             throw CodexSecureTransportError.invalidHandshake(
-                "The secure Remodex session is not ready yet. Try reconnecting."
+                "The secure Codex Remote session is not ready yet. Try reconnecting."
             )
         }
 
@@ -251,7 +251,7 @@ extension CodexService {
         self.secureSession = secureSession
         let data = try JSONEncoder().encode(envelope)
         guard let text = String(data: data, encoding: .utf8) else {
-            throw CodexSecureTransportError.invalidHandshake("Unable to encode the secure Remodex envelope.")
+            throw CodexSecureTransportError.invalidHandshake("Unable to encode the secure Codex Remote envelope.")
         }
         return text
     }
@@ -444,16 +444,16 @@ private extension CodexService {
     // Centralizes the bridge-update guidance so every mismatch shows the same Mac command.
     func presentBridgeUpdatePrompt(message: String) {
         bridgeUpdatePrompt = CodexBridgeUpdatePrompt(
-            title: "Update the Remodex package on your computer",
+            title: "Update the Codex Remote package on your computer",
             message: message,
-            command: "npm install -g remodex@latest"
+            command: "npm install -g codex-remote@latest"
         )
     }
 
     func sendWireControlMessage<Value: Encodable>(_ value: Value) async throws {
         let data = try JSONEncoder().encode(value)
         guard let text = String(data: data, encoding: .utf8) else {
-            throw CodexSecureTransportError.invalidHandshake("Unable to encode the secure Remodex control payload.")
+            throw CodexSecureTransportError.invalidHandshake("Unable to encode the secure Codex Remote control payload.")
         }
         try await sendRawText(text)
     }
@@ -472,7 +472,7 @@ private extension CodexService {
         }
 
         let waiterID = UUID()
-        let timeoutMessage = "Timed out waiting for the secure Remodex \(kind) message."
+        let timeoutMessage = "Timed out waiting for the secure Codex Remote \(kind) message."
 
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
             pendingSecureControlContinuations[kind, default: []].append(
@@ -562,7 +562,7 @@ private extension CodexService {
               envelope.keyEpoch == secureSession.keyEpoch,
               envelope.sender == "mac",
               envelope.counter > secureSession.lastInboundCounter else {
-            lastErrorMessage = "The secure Remodex payload could not be verified."
+            lastErrorMessage = "The secure Codex Remote payload could not be verified."
             secureConnectionState = .rePairRequired
             return
         }

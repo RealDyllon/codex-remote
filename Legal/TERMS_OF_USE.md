@@ -1,14 +1,14 @@
-# Remodex — Terms of Use
+# Codex Remote — Terms of Use
 
 **Last updated:** March 25, 2026
 
-These Terms of Use ("Terms") govern your access to and use of the Remodex mobile application ("App"), developed and published by Emanuele Di Pietro ("Developer", "we", "us", or "our"). By downloading, installing, or using the App, you agree to these Terms. If you do not agree, do not use the App.
+These Terms of Use ("Terms") govern your access to and use of the Codex Remote mobile application ("App"), developed and published by Emanuele Di Pietro ("Developer", "we", "us", or "our"). By downloading, installing, or using the App, you agree to these Terms. If you do not agree, do not use the App.
 
 ---
 
 ## 1. Description of the App
 
-Remodex is an iOS companion app for controlling a Codex runtime on your Mac. The App can connect to your Mac directly or through a developer-operated hosted relay. Core features include real-time chat, git actions, photo attachments, voice transcription, pairing, and trusted reconnect.
+Codex Remote is an iOS companion app for controlling a Codex runtime on your Mac. The App can connect to your Mac directly or through a developer-operated hosted relay. Core features include real-time chat, git actions, photo attachments, voice transcription, pairing, and trusted reconnect.
 
 Most coding, repository, and workspace operations run on your paired Mac, not on our hosted relay.
 
@@ -18,16 +18,16 @@ You must be at least 13 years old, or the minimum age required in your jurisdict
 
 ## 3. Pairing and Security
 
-The App does not require a Remodex user account. Instead, it pairs with your Mac through a QR code flow and secure cryptographic session setup. You are responsible for keeping your paired devices secure and for activity performed through your paired environment.
+The App does not require a Codex Remote user account. Instead, it pairs with your Mac through a QR code flow and secure cryptographic session setup. You are responsible for keeping your paired devices secure and for activity performed through your paired environment.
 
 ## 4. Developer-Operated Services
 
-To provide the App Store experience, Remodex may operate hosted services such as:
+To provide the App Store experience, Codex Remote may operate hosted services such as:
 
 - a relay that routes traffic between your iPhone and paired Mac
 - a trusted reconnect endpoint
 
-These services are part of Remodex. They do not run Codex for you and do not replace your paired Mac runtime.
+These services are part of Codex Remote. They do not run Codex for you and do not replace your paired Mac runtime.
 
 ## 5. Third-Party Services
 
@@ -50,11 +50,11 @@ You agree not to:
 
 ## 7. Open Source
 
-Remodex includes open-source code and is published in public source form. Source-code use is governed by the applicable repository license. These Terms apply to the distributed mobile application and any related services we operate for it.
+Codex Remote includes open-source code and is published in public source form. Source-code use is governed by the applicable repository license. These Terms apply to the distributed mobile application and any related services we operate for it.
 
 ## 8. Intellectual Property
 
-The Remodex name, branding, and app presentation are owned by the Developer, except for third-party marks belonging to their respective owners. Nothing in these Terms grants you rights to our branding beyond normal use of the App.
+The Codex Remote name, branding, and app presentation are owned by the Developer, except for third-party marks belonging to their respective owners. Nothing in these Terms grants you rights to our branding beyond normal use of the App.
 
 ## 9. Availability and Changes
 
@@ -101,5 +101,5 @@ If any provision of these Terms is found unenforceable, the remaining provisions
 If you have questions about these Terms, you can reach us at:
 
 - **Email:** emandipietro@gmail.com
-- **GitHub:** [github.com/Emanuele-web04/remodex](https://github.com/Emanuele-web04/remodex)
+- **GitHub:** [github.com/RealDyllon/codex-remote](https://github.com/RealDyllon/codex-remote)
 - **X (Twitter):** [@emanueledpt](https://x.com/emanueledpt)

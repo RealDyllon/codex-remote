@@ -11,12 +11,12 @@ struct TerminalRunningIndicator: View {
     var body: some View {
         HStack(spacing: 6) {
             glyph
-            Text("Remodex is thinking...")
+            Text("Codex Remote is thinking...")
                 .font(AppFont.caption())
                 .foregroundStyle(.secondary)
                 .overlay { ShimmerLabelMask() }
                 .mask(
-                    Text("Remodex is thinking...")
+                    Text("Codex Remote is thinking...")
                         .font(AppFont.caption())
                 )
         }
@@ -25,7 +25,7 @@ struct TerminalRunningIndicator: View {
                 cursorOpacity = 0.18
             }
         }
-        .accessibilityLabel("Remodex is thinking")
+        .accessibilityLabel("Codex Remote is thinking")
     }
 
     private var glyph: some View {
