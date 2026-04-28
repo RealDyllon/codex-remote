@@ -13,8 +13,8 @@ This task fixed the two regressions found in review. The desktop refresher now r
 
 | File | Status | Role |
 |---|---|---|
-| `phodex-bridge/src/codex-desktop-refresher.js` | ✏️ Modified | Keeps pending completion refreshes alive until they actually run |
-| `phodex-bridge/test/codex-desktop-refresher.test.js` | ✏️ Modified | Covers the slow-refresh + queued-completion regression |
+| `codex-remote-bridge/src/codex-desktop-refresher.js` | ✏️ Modified | Keeps pending completion refreshes alive until they actually run |
+| `codex-remote-bridge/test/codex-desktop-refresher.test.js` | ✏️ Modified | Covers the slow-refresh + queued-completion regression |
 | `CodexMobile/CodexMobile/Views/Sidebar/SidebarThreadGrouping.swift` | ✏️ Modified | Adds a pure helper to resolve full live project membership |
 | `CodexMobile/CodexMobile/Views/SidebarView.swift` | ✏️ Modified | Uses the full project membership when archiving from the sidebar |
 | `CodexMobile/CodexMobileTests/SidebarThreadGroupingTests.swift` | ✏️ Modified | Adds coverage for filtered-project and no-project archive resolution |

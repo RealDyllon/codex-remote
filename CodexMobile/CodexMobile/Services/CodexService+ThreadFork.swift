@@ -59,7 +59,7 @@ extension CodexService {
         } catch {
             if consumeUnsupportedThreadFork(error) {
                 throw CodexServiceError.invalidInput(
-                    "This computer bridge does not support native thread forks yet. Update Remodex on your computer and retry."
+                    "This computer bridge does not support native thread forks yet. Update Codex Remote on your computer and retry."
                 )
             }
             throw error

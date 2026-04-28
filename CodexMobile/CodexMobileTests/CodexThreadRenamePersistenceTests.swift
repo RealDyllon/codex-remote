@@ -22,7 +22,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
         ]
 
@@ -33,7 +33,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             )
         )
 
@@ -54,7 +54,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
         ]
 
@@ -66,7 +66,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             )
         )
 
@@ -86,7 +86,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
         ]
 
@@ -98,7 +98,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
                 id: "thread-1",
                 title: "Mac Rename",
                 name: "Mac Rename",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             )
         )
 
@@ -109,7 +109,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             )
         )
 
@@ -129,7 +129,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
         ]
 
@@ -140,7 +140,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Mac Title Rename",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             )
         )
 
@@ -151,7 +151,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             )
         )
 
@@ -171,7 +171,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
         ]
 
@@ -182,7 +182,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             )
         )
 
@@ -202,7 +202,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Pinned Thread",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
         ]
         service.pinThread("thread-1")
@@ -226,7 +226,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "thread-1",
                 title: "Conversation",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
         ]
 
@@ -254,7 +254,7 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
                 title: "Pinned Thread",
                 preview: "Saved locally",
                 updatedAt: Date(timeIntervalSince1970: 1_700_000_000),
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
         ]
         service.pinThread("thread-1")
@@ -280,12 +280,12 @@ final class CodexThreadRenamePersistenceTests: XCTestCase {
             CodexThread(
                 id: "root-thread",
                 title: "Root Thread",
-                cwd: "/tmp/remodex"
+                cwd: "/tmp/codex-remote"
             ),
             CodexThread(
                 id: "child-thread",
                 title: "Child Thread",
-                cwd: "/tmp/remodex",
+                cwd: "/tmp/codex-remote",
                 parentThreadId: "root-thread"
             ),
         ]

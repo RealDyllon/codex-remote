@@ -11,18 +11,18 @@ import XCTest
 final class TurnViewModelGitBranchWorktreeTests: XCTestCase {
     func testWorktreePathResolvesOnlyForBranchesCheckedOutElsewhere() {
         let viewModel = TurnViewModel()
-        viewModel.gitBranchesCheckedOutElsewhere = ["remodex/feature-a"]
+        viewModel.gitBranchesCheckedOutElsewhere = ["codex-remote/feature-a"]
         viewModel.gitWorktreePathsByBranch = [
-            "remodex/feature-a": "/tmp/remodex-feature-a",
-            "main": "/tmp/remodex-main"
+            "codex-remote/feature-a": "/tmp/codex-remote-feature-a",
+            "main": "/tmp/codex-remote-main"
         ]
 
         XCTAssertEqual(
-            viewModel.worktreePathForCheckedOutElsewhereBranch("remodex/feature-a"),
-            "/tmp/remodex-feature-a"
+            viewModel.worktreePathForCheckedOutElsewhereBranch("codex-remote/feature-a"),
+            "/tmp/codex-remote-feature-a"
         )
         XCTAssertNil(viewModel.worktreePathForCheckedOutElsewhereBranch("main"))
-        XCTAssertNil(viewModel.worktreePathForCheckedOutElsewhereBranch("remodex/missing"))
+        XCTAssertNil(viewModel.worktreePathForCheckedOutElsewhereBranch("codex-remote/missing"))
     }
 
     func testApplyGitBranchTargetsStoresTrueLocalCheckoutPath() {
@@ -32,7 +32,7 @@ final class TurnViewModelGitBranchWorktreeTests: XCTestCase {
                 "branches": .array([.string("main")]),
                 "branchesCheckedOutElsewhere": .array([]),
                 "worktreePathByBranch": .object([:]),
-                "localCheckoutPath": .string("/tmp/remodex-local/phodex-bridge"),
+                "localCheckoutPath": .string("/tmp/codex-remote-local/codex-remote-bridge"),
                 "current": .string("main"),
                 "default": .string("main"),
             ]
@@ -40,18 +40,18 @@ final class TurnViewModelGitBranchWorktreeTests: XCTestCase {
 
         viewModel.applyGitBranchTargets(result)
 
-        XCTAssertEqual(viewModel.gitLocalCheckoutPath, "/tmp/remodex-local/phodex-bridge")
+        XCTAssertEqual(viewModel.gitLocalCheckoutPath, "/tmp/codex-remote-local/codex-remote-bridge")
     }
 
     func testApplyGitBranchTargetsKeepsSelectedBaseBranchEmptyWhenDefaultIsRemoteOnly() {
         let viewModel = TurnViewModel()
         let result = GitBranchesWithStatusResult(
             from: [
-                "branches": .array([.string("remodex/topic")]),
+                "branches": .array([.string("codex-remote/topic")]),
                 "branchesCheckedOutElsewhere": .array([]),
                 "worktreePathByBranch": .object([:]),
-                "localCheckoutPath": .string("/tmp/remodex-local/phodex-bridge"),
-                "current": .string("remodex/topic"),
+                "localCheckoutPath": .string("/tmp/codex-remote-local/codex-remote-bridge"),
+                "current": .string("codex-remote/topic"),
                 "default": .string("main"),
             ]
         )
@@ -67,11 +67,11 @@ final class TurnViewModelGitBranchWorktreeTests: XCTestCase {
         viewModel.selectedGitBaseBranch = "release/1.0"
         let result = GitBranchesWithStatusResult(
             from: [
-                "branches": .array([.string("main"), .string("release/1.0"), .string("remodex/topic")]),
+                "branches": .array([.string("main"), .string("release/1.0"), .string("codex-remote/topic")]),
                 "branchesCheckedOutElsewhere": .array([]),
                 "worktreePathByBranch": .object([:]),
-                "localCheckoutPath": .string("/tmp/remodex-local/phodex-bridge"),
-                "current": .string("remodex/topic"),
+                "localCheckoutPath": .string("/tmp/codex-remote-local/codex-remote-bridge"),
+                "current": .string("codex-remote/topic"),
                 "default": .string("main"),
             ]
         )

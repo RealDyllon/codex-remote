@@ -23,7 +23,7 @@ build/
 *.key
 *.cer
 CodexMobile/BuildSupport/PrivateOverrides.xcconfig
-phodex-bridge/src/private-defaults.json
+codex-remote-bridge/src/private-defaults.json
 security_best_practices_report.md
 
 # Build artifacts

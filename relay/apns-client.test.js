@@ -20,7 +20,7 @@ test("APNs authorization tokens use a 64-byte JOSE ES256 signature", async () =>
   const client = createAPNsClient({
     teamId: "TEAM123456",
     keyId: "KEY1234567",
-    bundleId: "com.example.remodex",
+    bundleId: "com.example.codexremote",
     privateKey: privateKey.export({ type: "pkcs8", format: "pem" }),
     http2Connect() {
       return {

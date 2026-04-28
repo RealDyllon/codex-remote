@@ -37,7 +37,7 @@ enum TurnComposerSlashCommand: String, Identifiable, Equatable {
         case .codeReview:
             return "Run the reviewer on your local changes"
         case .feedback:
-            return "Share feedback on Remodex with the developer"
+            return "Share feedback on Codex Remote with the developer"
         case .fork:
             return "Fork this thread into local or a new worktree"
         case .status:

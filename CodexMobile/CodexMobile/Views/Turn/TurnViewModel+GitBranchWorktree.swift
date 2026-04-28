@@ -792,7 +792,7 @@ private extension TurnViewModel {
         if let defaultBranch = result.defaultBranch, !defaultBranch.isEmpty {
             gitDefaultBranch = defaultBranch
             let currentSelectedBaseBranch = selectedGitBaseBranch.trimmingCharacters(in: .whitespacesAndNewlines)
-            let localDefaultBranch = remodexSelectableDefaultBranch(
+            let localDefaultBranch = codexRemoteSelectableDefaultBranch(
                 defaultBranch: defaultBranch,
                 availableGitBranchTargets: result.branches
             ) ?? ""

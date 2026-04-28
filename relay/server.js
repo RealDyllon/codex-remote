@@ -1,5 +1,5 @@
 // FILE: server.js
-// Purpose: Hosts the public Remodex relay plus optional push-notification HTTP endpoints.
+// Purpose: Hosts the public Codex Remote relay plus optional push-notification HTTP endpoints.
 // Layer: Standalone server entrypoint
 // Exports: createRelayServer, createFixedWindowRateLimiter
 // Depends on: http, ws, ./relay, ./push-service
@@ -355,9 +355,9 @@ function createFixedWindowRateLimiter({ windowMs, maxRequests, now = () => Date.
 
 if (require.main === module) {
   const port = Number(process.env.PORT || 9000);
-  const trustProxy = readOptionalBooleanEnv(["REMODEX_TRUST_PROXY", "PHODEX_TRUST_PROXY"]) ?? false;
+  const trustProxy = readOptionalBooleanEnv(["CODEX_REMOTE_TRUST_PROXY"]) ?? false;
   const enablePushService = readOptionalBooleanEnv(
-    ["REMODEX_ENABLE_PUSH_SERVICE", "PHODEX_ENABLE_PUSH_SERVICE"]
+    ["CODEX_REMOTE_ENABLE_PUSH_SERVICE"]
   ) ?? false;
   const { server } = createRelayServer({ enablePushService, trustProxy });
   server.listen(port, () => {

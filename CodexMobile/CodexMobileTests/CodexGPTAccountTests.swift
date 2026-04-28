@@ -111,9 +111,9 @@ final class CodexGPTAccountTests: XCTestCase {
         XCTAssertEqual(service.latestBridgePackageVersion, "1.3.8")
         XCTAssertEqual(
             service.bridgeUpdatePrompt?.title,
-            "A newer Remodex update is available on your Mac"
+            "A newer Codex Remote update is available on your Mac"
         )
-        XCTAssertEqual(service.bridgeUpdatePrompt?.command, "npm install -g remodex@latest")
+        XCTAssertEqual(service.bridgeUpdatePrompt?.command, "npm install -g codex-remote@latest")
         XCTAssertEqual(service.gptAccountSnapshot.status, .unknown)
     }
 
@@ -208,7 +208,7 @@ final class CodexGPTAccountTests: XCTestCase {
         XCTAssertEqual(service.latestBridgePackageVersion, "1.3.8")
         XCTAssertEqual(
             service.bridgeUpdatePrompt?.title,
-            "A newer Remodex update is available on your Mac"
+            "A newer Codex Remote update is available on your Mac"
         )
     }
 
@@ -518,13 +518,13 @@ final class CodexGPTAccountTests: XCTestCase {
         }
 
         _ = try await service.startOrResumeGPTLogin()
-        await service.handleGPTLoginCallbackURL(URL(string: "phodex://auth/gpt/callback?code=abc")!)
+        await service.handleGPTLoginCallbackURL(URL(string: "codex-remote://auth/gpt/callback?code=abc")!)
 
         XCTAssertTrue(observedMethods.contains("account/login/complete"))
         XCTAssertEqual(capturedCompleteParams?["loginId"]?.stringValue, "login-123")
         XCTAssertEqual(
             capturedCompleteParams?["callbackUrl"]?.stringValue,
-            "phodex://auth/gpt/callback?code=abc"
+            "codex-remote://auth/gpt/callback?code=abc"
         )
     }
 
@@ -591,7 +591,7 @@ final class CodexGPTAccountTests: XCTestCase {
 
         await XCTAssertThrowsErrorAsync({
             try await service.transcribeVoiceAudioFile(
-                at: URL(fileURLWithPath: "/tmp/remodex-voice-test.wav"),
+                at: URL(fileURLWithPath: "/tmp/codex-remote-voice-test.wav"),
                 durationSeconds: 1
             )
         }) { error in

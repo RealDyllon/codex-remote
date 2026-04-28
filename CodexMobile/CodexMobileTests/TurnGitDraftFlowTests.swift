@@ -124,7 +124,7 @@ final class TurnGitDraftFlowTests: XCTestCase {
                     id: .string(UUID().uuidString),
                     result: .object([
                         "hash": .string("abc123"),
-                        "branch": .string("remodex/topic"),
+                        "branch": .string("codex-remote/topic"),
                         "summary": .string("1 file changed"),
                     ]),
                     includeJSONRPC: false
@@ -133,8 +133,8 @@ final class TurnGitDraftFlowTests: XCTestCase {
                 return RPCMessage(
                     id: .string(UUID().uuidString),
                     result: .object([
-                        "branch": .string("remodex/topic"),
-                        "tracking": .string("origin/remodex/topic"),
+                        "branch": .string("codex-remote/topic"),
+                        "tracking": .string("origin/codex-remote/topic"),
                         "dirty": .bool(false),
                         "ahead": .integer(0),
                         "behind": .integer(0),
@@ -171,8 +171,8 @@ final class TurnGitDraftFlowTests: XCTestCase {
     }
 
     func testPullRequestURLIncludesGitHubPrefillQueryParameters() throws {
-        let urlString = remodexBuildPullRequestURL(
-            ownerRepo: "openai/remodex",
+        let urlString = codexRemoteBuildPullRequestURL(
+            ownerRepo: "openai/codex-remote",
             branch: "feature/topic",
             base: "main",
             title: "Improve local git drafts",

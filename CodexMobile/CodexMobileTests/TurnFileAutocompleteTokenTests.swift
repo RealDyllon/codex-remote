@@ -39,7 +39,7 @@ final class TurnFileAutocompleteTokenTests: XCTestCase {
     }
 
     func testTrailingTokenDoesNotParseBareTerminalHandle() {
-        XCTAssertNil(TurnViewModel.trailingFileAutocompleteToken(in: "paste @remodex"))
+        XCTAssertNil(TurnViewModel.trailingFileAutocompleteToken(in: "paste @codex-remote"))
     }
 
     func testTrailingTokenStillParsesLineReferencedFile() {

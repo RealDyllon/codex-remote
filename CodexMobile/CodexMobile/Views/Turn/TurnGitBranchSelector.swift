@@ -7,17 +7,17 @@
 import SwiftUI
 
 // Normalizes newly created local branch names toward the repo's preferred prefix without double-prefixing.
-func remodexNormalizedCreatedBranchName(_ rawName: String) -> String {
+func codexRemoteNormalizedCreatedBranchName(_ rawName: String) -> String {
     let trimmedName = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !trimmedName.isEmpty else { return "" }
-    if trimmedName.hasPrefix("remodex/") {
+    if trimmedName.hasPrefix("codex-remote/") {
         return trimmedName
     }
-    return "remodex/\(trimmedName)"
+    return "codex-remote/\(trimmedName)"
 }
 
 // Leaves "open elsewhere" branches selectable so the caller can surface the right alert or git error.
-func remodexCurrentBranchSelectionIsDisabled(
+func codexRemoteCurrentBranchSelectionIsDisabled(
     branch: String,
     currentBranch: String,
     gitBranchesCheckedOutElsewhere: Set<String>,
@@ -35,7 +35,7 @@ func remodexCurrentBranchSelectionIsDisabled(
     return false
 }
 
-func remodexSelectableDefaultBranch(
+func codexRemoteSelectableDefaultBranch(
     defaultBranch: String,
     availableGitBranchTargets: [String]
 ) -> String? {
@@ -109,7 +109,7 @@ struct TurnGitBranchSelector: View {
             return nil
         }
 
-        return remodexSelectableDefaultBranch(
+        return codexRemoteSelectableDefaultBranch(
             defaultBranch: normalizedDefaultBranch,
             availableGitBranchTargets: availableGitBranchTargets
         )
@@ -241,14 +241,14 @@ struct TurnGitBranchPickerSheet: View {
 
     private var isNewBranchNameValid: Bool {
         let trimmed = newBranchName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, trimmed != "remodex/" else { return false }
+        guard !trimmed.isEmpty, trimmed != "codex-remote/" else { return false }
         return true
     }
 
     // Suggests quick branch creation when the search query does not match an existing branch.
     private var suggestedCreateBranchName: String? {
         guard allowsSelectingCurrentBranch else { return nil }
-        let candidate = remodexNormalizedCreatedBranchName(searchText)
+        let candidate = codexRemoteNormalizedCreatedBranchName(searchText)
         guard !candidate.isEmpty else { return nil }
 
         let normalizedCandidate = candidate.lowercased()
@@ -273,7 +273,7 @@ struct TurnGitBranchPickerSheet: View {
         List {
             Section(sectionTitle) {
                 if showsDefaultBranchRow, let defaultBranch {
-                    let isDisabled = remodexCurrentBranchSelectionIsDisabled(
+                    let isDisabled = codexRemoteCurrentBranchSelectionIsDisabled(
                         branch: defaultBranch,
                         currentBranch: currentBranch,
                         gitBranchesCheckedOutElsewhere: gitBranchesCheckedOutElsewhere,
@@ -297,7 +297,7 @@ struct TurnGitBranchPickerSheet: View {
                 }
 
                 ForEach(orderedBranches, id: \.self) { branch in
-                    let isDisabled = remodexCurrentBranchSelectionIsDisabled(
+                    let isDisabled = codexRemoteCurrentBranchSelectionIsDisabled(
                         branch: branch,
                         currentBranch: currentBranch,
                         gitBranchesCheckedOutElsewhere: gitBranchesCheckedOutElsewhere,
@@ -344,8 +344,8 @@ struct TurnGitBranchPickerSheet: View {
                     }
 
                     Button {
-                        let fromSearch = remodexNormalizedCreatedBranchName(searchText)
-                        newBranchName = fromSearch.isEmpty ? "remodex/" : fromSearch
+                        let fromSearch = codexRemoteNormalizedCreatedBranchName(searchText)
+                        newBranchName = fromSearch.isEmpty ? "codex-remote/" : fromSearch
                         isShowingCreateBranchPrompt = true
                     } label: {
                         Label("New branch...", systemImage: "plus")
@@ -374,12 +374,12 @@ struct TurnGitBranchPickerSheet: View {
         .environment(\.defaultMinListRowHeight, 28)
         .searchable(text: $searchText, prompt: "Search branches")
         .alert("New branch", isPresented: $isShowingCreateBranchPrompt) {
-            TextField("remodex/my-feature", text: $newBranchName)
+            TextField("codex-remote/my-feature", text: $newBranchName)
             Button("Cancel", role: .cancel) {
                 newBranchName = ""
             }
             Button("Create") {
-                let branchName = remodexNormalizedCreatedBranchName(newBranchName)
+                let branchName = codexRemoteNormalizedCreatedBranchName(newBranchName)
                 guard !branchName.isEmpty else { return }
                 onCreateBranch(branchName)
                 newBranchName = ""
@@ -453,8 +453,8 @@ private struct TurnGitBranchBadge: View {
         branches: [
             "feature/auth-flow",
             "feature/dark-mode",
-            "remodex/onboarding-v2",
-            "remodex/sidebar-refactor",
+            "codex-remote/onboarding-v2",
+            "codex-remote/sidebar-refactor",
             "fix/crash-on-launch",
             "fix/memory-leak-timeline",
             "chore/bump-dependencies",
@@ -462,9 +462,9 @@ private struct TurnGitBranchBadge: View {
         ],
         gitBranchesCheckedOutElsewhere: ["feature/dark-mode"],
         gitWorktreePathsByBranch: ["feature/dark-mode": "/tmp/worktree"],
-        selectedBranch: "remodex/onboarding-v2",
+        selectedBranch: "codex-remote/onboarding-v2",
         defaultBranch: "main",
-        currentBranch: "remodex/onboarding-v2",
+        currentBranch: "codex-remote/onboarding-v2",
         allowsSelectingCurrentBranch: true,
         sectionTitle: "Branches",
         navigationTitle: "Current Branch",

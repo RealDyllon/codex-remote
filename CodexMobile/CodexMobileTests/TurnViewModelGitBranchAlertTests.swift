@@ -72,7 +72,7 @@ final class TurnViewModelGitBranchAlertTests: XCTestCase {
             ]
         )
 
-        let alert = viewModel.gitBranchAlert(for: .create("remodex/topic"))
+        let alert = viewModel.gitBranchAlert(for: .create("codex-remote/topic"))
 
         XCTAssertEqual(alert?.title, "Local commits stay on main")
         XCTAssertTrue(alert?.message.contains("1 local commit") == true)

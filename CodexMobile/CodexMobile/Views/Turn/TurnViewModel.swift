@@ -204,7 +204,7 @@ final class TurnViewModel {
     }
     var canCreatePullRequest: Bool { createPullRequestValidationMessage == nil }
     var localSelectableGitDefaultBranch: String? {
-        remodexSelectableDefaultBranch(
+        codexRemoteSelectableDefaultBranch(
             defaultBranch: gitDefaultBranch,
             availableGitBranchTargets: availableGitBranchTargets
         )
@@ -2172,7 +2172,7 @@ final class TurnViewModel {
                         model: gitWriterModel,
                         baseBranch: base
                     )
-                    let prURL = remodexBuildPullRequestURL(
+                    let prURL = codexRemoteBuildPullRequestURL(
                         ownerRepo: ownerRepo,
                         branch: branch,
                         base: base,
@@ -2302,7 +2302,7 @@ final class TurnViewModel {
 
 }
 
-func remodexBuildPullRequestURL(
+func codexRemoteBuildPullRequestURL(
     ownerRepo: String,
     branch: String,
     base: String,

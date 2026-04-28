@@ -1,14 +1,14 @@
-# Remodex — Data Protection Notice
+# Codex Remote — Data Protection Notice
 
 **Last updated:** March 25, 2026
 
-This Data Protection Notice explains how the Remodex mobile application ("App"), developed by Emanuele Di Pietro ("Developer", "we", "us", or "our"), handles your information. Remodex is designed to let you control a Codex runtime on your Mac from your iPhone. Most conversation and workspace activity is processed on your paired Mac, but the App Store version can also use developer-operated relay infrastructure to connect your devices.
+This Data Protection Notice explains how the Codex Remote mobile application ("App"), developed by Emanuele Di Pietro ("Developer", "we", "us", or "our"), handles your information. Codex Remote is designed to let you control a Codex runtime on your Mac from your iPhone. Most conversation and workspace activity is processed on your paired Mac, but the App Store version can also use developer-operated relay infrastructure to connect your devices.
 
 ---
 
 ## 1. Overview
 
-Remodex is a local-first remote companion for Codex on your Mac. In practice, this means:
+Codex Remote is a local-first remote companion for Codex on your Mac. In practice, this means:
 
 - Your conversations, repository actions, and workspace interactions are primarily processed on your paired Mac.
 - We do not operate user accounts or cloud databases.
@@ -23,7 +23,7 @@ Remodex is a local-first remote companion for Codex on your Mac. In practice, th
 
 - **Chat messages and prompts** — Your messages are sent from the iPhone to your paired Mac for processing. After the secure transport handshake is complete, the relay forwards encrypted payloads and cannot read message contents.
 - **Photo attachments** — Images you attach from the camera or photo library are sent to your paired Mac over the secure channel.
-- **Voice recordings** — When you use voice mode, the App records a temporary WAV file on your iPhone and uploads that audio directly from the iPhone to OpenAI/ChatGPT for transcription. The request is authenticated with a ChatGPT token resolved from your paired Mac over the encrypted Remodex channel.
+- **Voice recordings** — When you use voice mode, the App records a temporary WAV file on your iPhone and uploads that audio directly from the iPhone to OpenAI/ChatGPT for transcription. The request is authenticated with a ChatGPT token resolved from your paired Mac over the encrypted Codex Remote channel.
 - **Git operations** — Commands you initiate from the App, such as commit, pull, push, branch, or status actions, are executed on your paired Mac.
 
 ### 2.2 Information Collected Automatically
@@ -43,7 +43,7 @@ If you contact us directly, we will of course receive whatever information you i
 
 ## 3. How We Use Information
 
-We use the information above only to operate and secure Remodex, including:
+We use the information above only to operate and secure Codex Remote, including:
 
 - pairing your iPhone with your Mac
 - routing encrypted traffic between your iPhone and Mac
@@ -63,7 +63,7 @@ If you are in the European Economic Area, we rely on the following legal bases:
 
 ## 4. Services That Process Data
 
-### 4.1 Developer-Operated Remodex Infrastructure
+### 4.1 Developer-Operated Codex Remote Infrastructure
 
 The App Store build can use developer-operated infrastructure for:
 
@@ -76,7 +76,7 @@ This infrastructure may process:
 - connection metadata such as IP address, timestamps, and route-level request data
 - secure control messages needed to establish the encrypted session
 
-Once the secure session is active, the hosted relay does **not** decrypt your Remodex application payloads.
+Once the secure session is active, the hosted relay does **not** decrypt your Codex Remote application payloads.
 
 ### 4.2 OpenAI / ChatGPT
 
@@ -140,7 +140,7 @@ You can revoke camera, microphone, photo library, and local network permissions 
 
 Depending on your jurisdiction, you may have rights to access, correct, delete, restrict, or object to the processing of personal information, and to request portability where applicable.
 
-Because Remodex is primarily local-first, much of your data remains under your direct control on your devices. We do not maintain a centralized database of your personal data. Some data may be processed or retained by Apple and OpenAI according to their own operational needs and policies.
+Because Codex Remote is primarily local-first, much of your data remains under your direct control on your devices. We do not maintain a centralized database of your personal data. Some data may be processed or retained by Apple and OpenAI according to their own operational needs and policies.
 
 ### 8.1 California Notice
 
@@ -163,5 +163,5 @@ We may update this Data Protection Notice from time to time. When we do, we will
 If you have questions about this Data Protection Notice or want to exercise your privacy rights, you can reach us at:
 
 - **Email:** emandipietro@gmail.com
-- **GitHub:** [github.com/Emanuele-web04/remodex](https://github.com/Emanuele-web04/remodex)
+- **GitHub:** [github.com/RealDyllon/codex-remote](https://github.com/RealDyllon/codex-remote)
 - **X (Twitter):** [@emanueledpt](https://x.com/emanueledpt)

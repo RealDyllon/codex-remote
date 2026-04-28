@@ -17,7 +17,7 @@ struct SidebarHeaderView: View {
                 .frame(width: 26, height: 26)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
-            Text("Remodex")
+            Text("Codex Remote")
                 .font(AppFont.title3(weight: .medium))
 
             Spacer(minLength: 0)
