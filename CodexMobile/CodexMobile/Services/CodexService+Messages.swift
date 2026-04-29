@@ -494,6 +494,19 @@ extension CodexService {
     // Returns sidebar-only chat badge state. This intentionally stays separate from
     // per-turn runtime truth so "chat finished unread" does not leak into timeline logic.
     func threadRunBadgeState(for threadId: String) -> CodexThreadRunBadgeState? {
+        let normalizedThreadID = threadId.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasPendingApproval = pendingApprovals.contains { request in
+            if let requestThreadID = request.threadId?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !requestThreadID.isEmpty {
+                return requestThreadID == normalizedThreadID
+            }
+
+            return activeThreadId == normalizedThreadID
+        }
+
+        if hasPendingApproval {
+            return .pendingApproval
+        }
         if threadHasActiveOrRunningTurn(threadId) {
             return .running
         }
