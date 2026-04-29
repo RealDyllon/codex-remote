@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  node-tests:
+    if: ${{ !github.event.pull_request.draft }}
+    name: ${{ matrix.package.name }} tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - name: Relay
+            path: relay
+            lockfile: relay/package-lock.json
+          - name: Bridge
+            path: codex-remote-bridge
+            lockfile: codex-remote-bridge/package-lock.json
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.package.lockfile }}
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.package.path }}
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ${{ matrix.package.path }}
+        run: npm test
+
+  ios-tests:
+    if: ${{ !github.event.pull_request.draft }}
+    name: iOS app tests
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+
+      - name: Run iOS tests
+        working-directory: CodexMobile
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project CodexMobile.xcodeproj \
+            -scheme CodexMobile \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            CODE_SIGNING_ALLOWED=NO
