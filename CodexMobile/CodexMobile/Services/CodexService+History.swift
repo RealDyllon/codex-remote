@@ -718,8 +718,12 @@ extension CodexService {
             activeThreadIDs: activeThreadIDs,
             runningThreadIDs: runningThreadIDs
         )
-        let boundaryOverlapKeys = Set(stablePrefix.suffix(32).map(Self.historyMessageKey))
-        let filteredTail = mergedTail.filter { !boundaryOverlapKeys.contains(historyMessageKey(for: $0)) }
+        let stablePrefixIDs = Set(stablePrefix.map(\.id))
+        let stablePrefixKeys = Set(stablePrefix.map(Self.historyMessageKey))
+        let filteredTail = mergedTail.filter { message in
+            !stablePrefixIDs.contains(message.id)
+                && !stablePrefixKeys.contains(historyMessageKey(for: message))
+        }
         return stablePrefix + filteredTail
     }
 
@@ -851,7 +855,13 @@ extension CodexService {
 
     nonisolated static func historyMessageKey(for message: CodexMessage) -> String {
         if let itemId = message.itemId, !itemId.isEmpty {
-            return "item:\(message.role.rawValue):\(message.kind.rawValue):\(itemId)"
+            return [
+                "item",
+                message.role.rawValue,
+                message.kind.rawValue,
+                message.turnId ?? "no-turn",
+                itemId,
+            ].joined(separator: ":")
         }
 
         return [
@@ -878,6 +888,9 @@ extension CodexService {
     nonisolated static func stableAssistantMessageID(threadId: String, turnId: String?, itemId: String?) -> String? {
         guard let itemId = normalizedHistoryIdentifier(itemId) else {
             return nil
+        }
+        if let turnId = normalizedHistoryIdentifier(turnId) {
+            return "assistant:\(threadId):turn:\(turnId):item:\(itemId)"
         }
         return "assistant:\(threadId):item:\(itemId)"
     }
