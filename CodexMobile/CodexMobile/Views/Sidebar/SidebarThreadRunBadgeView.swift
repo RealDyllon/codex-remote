@@ -10,24 +10,37 @@ struct SidebarThreadRunBadgeView: View {
     let state: CodexThreadRunBadgeState
 
     var body: some View {
-        Circle()
-            .fill(state.color)
-            .frame(width: 10, height: 10)
-            .overlay(
+        Group {
+            switch state {
+            case .running:
+                ProgressView()
+                    .controlSize(.mini)
+                    .tint(.secondary)
+                    .frame(width: 14, height: 14)
+            case .pendingApproval, .ready, .failed:
                 Circle()
-                    .stroke(Color(.systemBackground), lineWidth: 1)
-            )
-            .accessibilityHidden(true)
+                    .fill(state.color)
+                    .frame(width: 10, height: 10)
+                    .overlay(
+                        Circle()
+                            .stroke(Color(.systemBackground), lineWidth: 1)
+                    )
+                    .frame(width: 14, height: 14)
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 
 private extension CodexThreadRunBadgeState {
     var color: Color {
         switch self {
-        case .running:
-            return .blue
-        case .ready:
+        case .pendingApproval:
             return .green
+        case .running:
+            return .secondary
+        case .ready:
+            return .blue
         case .failed:
             return .red
         }

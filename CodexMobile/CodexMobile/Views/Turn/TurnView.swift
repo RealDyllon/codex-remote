@@ -24,8 +24,6 @@ struct TurnView: View {
     @State private var isLoadingRepositoryDiff = false
     @State private var repositoryDiffPresentation: TurnDiffPresentation?
     @State private var assistantRevertSheetState: AssistantRevertSheetState?
-    @State private var alertApprovalRequest: CodexApprovalRequest?
-    @State private var isApprovalAlertPresented = false
     @State private var isShowingMacHandoffConfirm = false
     @State private var isShowingWorktreeHandoff = false
     @State private var isShowingForkWorktree = false
@@ -114,14 +112,16 @@ struct TurnView: View {
                 isComposerFocused: isInputFocused,
                 isComposerAutocompletePresented: isComposerAutocompletePresented,
                 emptyState: resolvedEmptyConversationState,
-                composer: AnyView(composerWithSubagentAccessory(
-                    currentThread: resolvedThread,
-                    activeTurnID: activeTurnID,
-                    isThreadRunning: isThreadRunning,
-                    isEmptyThread: isEmptyThread,
-                    isWorktreeProject: isWorktreeProject,
-                    showsGitControls: showsGitControls,
-                    gitWorkingDirectory: gitWorkingDirectory
+                composer: AnyView(composerWithApprovalAccessory(
+                    composerWithSubagentAccessory(
+                        currentThread: resolvedThread,
+                        activeTurnID: activeTurnID,
+                        isThreadRunning: isThreadRunning,
+                        isEmptyThread: isEmptyThread,
+                        isWorktreeProject: isWorktreeProject,
+                        showsGitControls: showsGitControls,
+                        gitWorkingDirectory: gitWorkingDirectory
+                    )
                 )),
                 structuredPromptReplacementComposer: { message in
                     AnyView(composerStructuredPromptReplacement(message: message))
@@ -295,7 +295,7 @@ struct TurnView: View {
                 invalidatePendingVoicePreflight()
             },
             onApprovalRequestChanged: {
-                syncApprovalAlertPresentation()
+                isInputFocused = false
             }
         )
         .onDisappear {
@@ -375,30 +375,10 @@ struct TurnView: View {
             }
         }
         .turnViewAlerts(
-            alertApprovalRequest: $alertApprovalRequest,
-            isApprovalAlertPresented: $isApprovalAlertPresented,
             isShowingNothingToCommitAlert: isShowingNothingToCommitAlertBinding,
             gitSyncAlert: gitSyncAlertBinding,
             isShowingMacHandoffConfirm: $isShowingMacHandoffConfirm,
             macHandoffErrorMessage: $macHandoffErrorMessage,
-            onDeclineApproval: { request in
-                viewModel.decline(request, codex: codex) { didSucceed in
-                    if didSucceed {
-                        syncApprovalAlertPresentation()
-                    } else {
-                        restoreApprovalAlert(afterFailureOf: request)
-                    }
-                }
-            },
-            onApproveApproval: { request in
-                viewModel.approve(request, codex: codex) { didSucceed in
-                    if didSucceed {
-                        syncApprovalAlertPresentation()
-                    } else {
-                        restoreApprovalAlert(afterFailureOf: request)
-                    }
-                }
-            },
             onConfirmGitSyncAction: { alertAction in
                 viewModel.confirmGitSyncAlertAction(
                     alertAction,
@@ -649,19 +629,35 @@ struct TurnView: View {
             let isDismissing = viewModel.isStructuredPlanPromptDismissing(request.requestID, codex: codex)
 
             if !isDismissed {
-                StructuredUserInputCard(
-                    request: request,
-                    isInteractionLocked: isDismissing,
-                    secondaryActionTitle: isDismissing ? "Closing..." : "ESC",
-                    onSecondaryAction: isDismissing ? nil : {
-                        isInputFocused = true
-                        viewModel.dismissStructuredPlanPrompt(message, codex: codex, threadID: thread.id)
-                    }
+                composerWithApprovalAccessory(
+                    StructuredUserInputCard(
+                        request: request,
+                        isInteractionLocked: isDismissing,
+                        secondaryActionTitle: isDismissing ? "Closing..." : "ESC",
+                        onSecondaryAction: isDismissing ? nil : {
+                            isInputFocused = true
+                            viewModel.dismissStructuredPlanPrompt(message, codex: codex, threadID: thread.id)
+                        }
+                    )
+                    .id(request.requestID)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 4)
                 )
-                .id(request.requestID)
-                .padding(.horizontal, 12)
-                .padding(.top, 4)
             } else {
+                composerWithApprovalAccessory(
+                    composerWithSubagentAccessory(
+                        currentThread: currentResolvedThread,
+                        activeTurnID: codex.activeTurnID(for: thread.id),
+                        isThreadRunning: codex.timelineState(for: thread.id).renderSnapshot.isThreadRunning,
+                        isEmptyThread: codex.timelineState(for: thread.id).renderSnapshot.messages.isEmpty,
+                        isWorktreeProject: currentResolvedThread.isManagedWorktreeProject,
+                        showsGitControls: codex.isConnected && currentResolvedThread.gitWorkingDirectory != nil,
+                        gitWorkingDirectory: currentResolvedThread.gitWorkingDirectory
+                    )
+                )
+            }
+        } else {
+            composerWithApprovalAccessory(
                 composerWithSubagentAccessory(
                     currentThread: currentResolvedThread,
                     activeTurnID: codex.activeTurnID(for: thread.id),
@@ -671,18 +667,31 @@ struct TurnView: View {
                     showsGitControls: codex.isConnected && currentResolvedThread.gitWorkingDirectory != nil,
                     gitWorkingDirectory: currentResolvedThread.gitWorkingDirectory
                 )
-            }
-        } else {
-            composerWithSubagentAccessory(
-                currentThread: currentResolvedThread,
-                activeTurnID: codex.activeTurnID(for: thread.id),
-                isThreadRunning: codex.timelineState(for: thread.id).renderSnapshot.isThreadRunning,
-                isEmptyThread: codex.timelineState(for: thread.id).renderSnapshot.messages.isEmpty,
-                isWorktreeProject: currentResolvedThread.isManagedWorktreeProject,
-                showsGitControls: codex.isConnected && currentResolvedThread.gitWorkingDirectory != nil,
-                gitWorkingDirectory: currentResolvedThread.gitWorkingDirectory
             )
         }
+    }
+
+    private func composerWithApprovalAccessory<Content: View>(_ content: Content) -> some View {
+        VStack(spacing: 8) {
+            if let request = approvalForThread {
+                ApprovalBanner(
+                    request: request,
+                    isLoading: viewModel.isHandlingApproval,
+                    onApprove: {
+                        approveInlineApproval(request)
+                    },
+                    onDecline: {
+                        declineInlineApproval(request)
+                    }
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
+            content
+        }
+        .animation(.easeInOut(duration: 0.18), value: approvalRequestChangeToken)
     }
 
     private func handleGitActionSelection(
@@ -801,7 +810,6 @@ struct TurnView: View {
     }
 
     private func handleInitialAppear(activeTurnID: String?) {
-        syncApprovalAlertPresentation()
         if let pendingComposerAction = codex.consumePendingComposerAction(for: thread.id) {
             viewModel.applyPendingComposerAction(pendingComposerAction)
             isInputFocused = true
@@ -1165,14 +1173,16 @@ struct TurnView: View {
         return [request.id, reason, command].joined(separator: "|")
     }
 
-    private func syncApprovalAlertPresentation() {
-        alertApprovalRequest = approvalForThread
-        isApprovalAlertPresented = alertApprovalRequest != nil
+    private func approveInlineApproval(_ request: CodexApprovalRequest) {
+        viewModel.approve(request, codex: codex) { _ in
+            isInputFocused = false
+        }
     }
 
-    private func restoreApprovalAlert(afterFailureOf request: CodexApprovalRequest) {
-        alertApprovalRequest = approvalForThread ?? request
-        isApprovalAlertPresented = alertApprovalRequest != nil
+    private func declineInlineApproval(_ request: CodexApprovalRequest) {
+        viewModel.decline(request, codex: codex) { _ in
+            isInputFocused = false
+        }
     }
 
     private var parentThread: CodexThread? {
