@@ -55,12 +55,11 @@ struct ContentView: View {
     @State private var activeSidebarGestureDebugID: Int?
     @State private var lastSidebarGestureLogBucket: Int?
     @State private var sidebarGestureAutoCommitted = false
+    @State private var areSidebarInteractionsSuppressed = false
     @AppStorage("codex.hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("codex.whatsNew.lastPresentedVersion") private var lastPresentedWhatsNewVersion = ""
 
     private let sidebarWidth: CGFloat = 330
-    // Lets the drawer gesture start a bit inside the content instead of only on the bezel edge.
-    private let sidebarOpenActivationWidth: CGFloat = 80
     private let sidebarPrewarmDelayNanoseconds: UInt64 = 700_000_000
     private let whatsNewPresentationDelayNanoseconds: UInt64 = 30_000_000_000
     private let sidebarGestureLogBucketWidth: CGFloat = 40
@@ -331,6 +330,7 @@ struct ContentView: View {
                         selectedThread: $selectedThread,
                         showSettings: $showSettings,
                         isSearchActive: $isSearchActive,
+                        interactionsEnabled: !areSidebarInteractionsSuppressed,
                         showsInlineCloseButton: shouldUseFullWidthSidebar,
                         isVisible: sidebarVisible,
                         onClose: { closeSidebar() },
@@ -340,6 +340,7 @@ struct ContentView: View {
                     )
                     .frame(width: currentSidebarWidth)
                     .animation(.easeInOut(duration: 0.25), value: shouldUseFullWidthSidebar)
+                    .simultaneousGesture(sidebarContentCloseGesture, including: .subviews)
                 }
 
                 ZStack(alignment: .leading) {
@@ -364,7 +365,7 @@ struct ContentView: View {
                 .offset(x: currentSidebarRevealWidth)
             }
         }
-        .simultaneousGesture(edgeDragGesture)
+        .simultaneousGesture(navigationSwipeGesture)
     }
 
     // MARK: - Layers
@@ -596,90 +597,117 @@ struct ContentView: View {
 
     // MARK: - Gestures
 
-    private var edgeDragGesture: some Gesture {
+    private var navigationSwipeGesture: some Gesture {
         DragGesture(minimumDistance: 15, coordinateSpace: .global)
             .onChanged { value in
-                guard navigationPath.isEmpty else { return }
                 guard !sidebarGestureAutoCommitted else { return }
+                guard let action = navigationSwipeAction(for: value) else { return }
 
-                if !isSidebarOpen {
-                    guard value.startLocation.x < sidebarOpenActivationWidth,
-                          isOpeningSidebarGesture(value) else { return }
-                    beginSidebarGestureDebugIfNeeded(kind: "open", startX: value.startLocation.x)
-                    logSidebarGestureProgressIfNeeded(translation: value.translation.width)
-                    guard value.translation.width >= sidebarSwipeCommitDistance else { return }
-                    sidebarGestureAutoCommitted = true
-                    debugSidebarLog(
-                        "gesture #\(activeSidebarGestureDebugID ?? 0) auto-commit kind=open "
-                            + "translation=\(Int(value.translation.width)) commit=\(Int(sidebarSwipeCommitDistance))"
-                    )
-                    finishGesture(open: true)
-                } else {
-                    guard isClosingSidebarGesture(value) else { return }
-                    beginSidebarGestureDebugIfNeeded(kind: "close", startX: value.startLocation.x)
-                    logSidebarGestureProgressIfNeeded(translation: -value.translation.width)
-                    guard -value.translation.width >= sidebarSwipeCommitDistance else { return }
-                    sidebarGestureAutoCommitted = true
-                    debugSidebarLog(
-                        "gesture #\(activeSidebarGestureDebugID ?? 0) auto-commit kind=close "
-                            + "translation=\(Int(-value.translation.width)) commit=\(Int(sidebarSwipeCommitDistance))"
-                    )
-                    finishGesture(open: false)
-                }
+                let translation = RootNavigationSwipePolicy.progressTranslation(
+                    for: action,
+                    translationWidth: value.translation.width
+                )
+
+                beginSidebarGestureDebugIfNeeded(kind: action.debugKind, startX: value.startLocation.x)
+                logSidebarGestureProgressIfNeeded(translation: translation)
+                guard RootNavigationSwipePolicy.isCommitReached(
+                    for: action,
+                    translationWidth: value.translation.width,
+                    commitDistance: sidebarSwipeCommitDistance
+                ) else { return }
+
+                sidebarGestureAutoCommitted = true
+                debugSidebarLog(
+                    "gesture #\(activeSidebarGestureDebugID ?? 0) auto-commit kind=\(action.debugKind) "
+                        + "translation=\(Int(translation)) commit=\(Int(sidebarSwipeCommitDistance)) source=root"
+                )
+                finishGesture(action)
             }
             .onEnded { value in
-                guard navigationPath.isEmpty else { return }
                 if sidebarGestureAutoCommitted {
                     sidebarGestureAutoCommitted = false
                     return
                 }
 
-                if !isSidebarOpen {
-                    guard value.startLocation.x < sidebarOpenActivationWidth,
-                          isOpeningSidebarGesture(value) else {
-                        debugSidebarLog("gesture cancelled before open")
-                        sidebarDragOffset = 0
-                        sidebarGestureAutoCommitted = false
-                        resetSidebarGestureDebug()
-                        return
+                guard let action = navigationSwipeAction(for: value) else {
+                    if activeSidebarGestureDebugID != nil {
+                        debugSidebarLog("gesture cancelled before commit source=root")
                     }
-                    debugSidebarLog(
-                        "gesture #\(activeSidebarGestureDebugID ?? 0) end kind=open "
-                            + "translation=\(Int(value.translation.width)) predicted=\(Int(value.predictedEndTranslation.width)) "
-                            + "commit=\(Int(sidebarSwipeCommitDistance)) decision=snap-close"
-                    )
                     sidebarDragOffset = 0
+                    sidebarGestureAutoCommitted = false
                     resetSidebarGestureDebug()
-                } else {
-                    guard isClosingSidebarGesture(value) else {
-                        debugSidebarLog("gesture cancelled before close")
-                        sidebarDragOffset = 0
-                        sidebarGestureAutoCommitted = false
-                        resetSidebarGestureDebug()
-                        return
-                    }
-                    debugSidebarLog(
-                        "gesture #\(activeSidebarGestureDebugID ?? 0) end kind=close "
-                            + "translation=\(Int(-value.translation.width)) predicted=\(Int(-value.predictedEndTranslation.width)) "
-                            + "commit=\(Int(sidebarSwipeCommitDistance)) decision=snap-open"
-                    )
-                    sidebarDragOffset = 0
-                    resetSidebarGestureDebug()
+                    return
                 }
+
+                let translation = RootNavigationSwipePolicy.progressTranslation(
+                    for: action,
+                    translationWidth: value.translation.width
+                )
+                let predictedTranslation = RootNavigationSwipePolicy.progressTranslation(
+                    for: action,
+                    translationWidth: value.predictedEndTranslation.width
+                )
+
+                debugSidebarLog(
+                    "gesture #\(activeSidebarGestureDebugID ?? 0) end kind=\(action.debugKind) "
+                        + "translation=\(Int(translation)) predicted=\(Int(predictedTranslation)) "
+                        + "commit=\(Int(sidebarSwipeCommitDistance)) decision=cancel source=root"
+                )
+                sidebarDragOffset = 0
+                resetSidebarGestureDebug()
             }
     }
 
-    // Keeps the sidebar swipe from claiming mostly vertical drags near the screen edge.
-    private func isOpeningSidebarGesture(_ value: DragGesture.Value) -> Bool {
-        let horizontal = value.translation.width
-        let vertical = value.translation.height
-        return horizontal > 0 && abs(horizontal) > abs(vertical) * 1.15
-    }
+    private var sidebarContentCloseGesture: some Gesture {
+        DragGesture(minimumDistance: 15, coordinateSpace: .global)
+            .onChanged { value in
+                guard !sidebarGestureAutoCommitted else { return }
+                guard let action = sidebarCloseSwipeAction(for: value) else { return }
 
-    private func isClosingSidebarGesture(_ value: DragGesture.Value) -> Bool {
-        let horizontal = value.translation.width
-        let vertical = value.translation.height
-        return horizontal < 0 && abs(horizontal) > abs(vertical) * 1.15
+                let translation = RootNavigationSwipePolicy.progressTranslation(
+                    for: action,
+                    translationWidth: value.translation.width
+                )
+
+                beginSidebarGestureDebugIfNeeded(kind: action.debugKind, startX: value.startLocation.x)
+                logSidebarGestureProgressIfNeeded(translation: translation)
+                guard RootNavigationSwipePolicy.isCommitReached(
+                    for: action,
+                    translationWidth: value.translation.width,
+                    commitDistance: sidebarSwipeCommitDistance
+                ) else { return }
+
+                sidebarGestureAutoCommitted = true
+                debugSidebarLog(
+                    "gesture #\(activeSidebarGestureDebugID ?? 0) auto-commit kind=\(action.debugKind) "
+                        + "translation=\(Int(translation)) commit=\(Int(sidebarSwipeCommitDistance)) source=sidebar"
+                )
+                finishGesture(action)
+            }
+            .onEnded { value in
+                if sidebarGestureAutoCommitted {
+                    sidebarGestureAutoCommitted = false
+                    return
+                }
+
+                guard let action = sidebarCloseSwipeAction(for: value) else { return }
+
+                let translation = RootNavigationSwipePolicy.progressTranslation(
+                    for: action,
+                    translationWidth: value.translation.width
+                )
+                let predictedTranslation = RootNavigationSwipePolicy.progressTranslation(
+                    for: action,
+                    translationWidth: value.predictedEndTranslation.width
+                )
+
+                debugSidebarLog(
+                    "gesture #\(activeSidebarGestureDebugID ?? 0) end kind=\(action.debugKind) "
+                        + "translation=\(Int(translation)) predicted=\(Int(predictedTranslation)) "
+                        + "commit=\(Int(sidebarSwipeCommitDistance)) decision=cancel source=sidebar"
+                )
+                resetSidebarGestureDebug()
+            }
     }
 
     // MARK: - Sidebar Actions
@@ -778,10 +806,26 @@ struct ContentView: View {
             && !isRetryingSavedPairing
     }
 
-    private func finishGesture(open: Bool) {
+    private func finishGesture(_ action: RootNavigationSwipeAction) {
         HapticFeedback.shared.triggerImpactFeedback(style: .light)
-        debugSidebarLog("finishGesture open=\(open)")
-        setSidebar(open: open)
+        debugSidebarLog("finishGesture action=\(action.debugKind)")
+
+        switch action {
+        case .openSidebar:
+            setSidebar(open: true)
+        case .closeSidebar:
+            areSidebarInteractionsSuppressed = true
+            setSidebar(open: false)
+        case .navigateBack:
+            dismissActiveKeyboard()
+            withAnimation(Self.sidebarSpring) {
+                if !navigationPath.isEmpty {
+                    navigationPath.removeLast()
+                }
+            }
+            sidebarGestureAutoCommitted = false
+            resetSidebarGestureDebug()
+        }
     }
 
     // Forces UIKit-backed inputs like the composer text view to resign before the drawer settles open.
@@ -791,6 +835,7 @@ struct ContentView: View {
                 + "visible=\(sidebarVisible) revealWidth=\(Int(sidebarRevealWidth))"
         )
         if open {
+            areSidebarInteractionsSuppressed = false
             dismissActiveKeyboard()
         }
         withAnimation(Self.sidebarSpring) {
@@ -883,6 +928,40 @@ struct ContentView: View {
         guard Self.isSidebarDebugLoggingEnabled else { return }
         print("[SidebarDebug] \(message())")
         #endif
+    }
+
+    private func navigationSwipeAction(
+        for value: DragGesture.Value
+    ) -> RootNavigationSwipeAction? {
+        RootNavigationSwipePolicy.action(
+            startLocationX: value.startLocation.x,
+            translationWidth: value.translation.width,
+            translationHeight: value.translation.height,
+            isSidebarOpen: isSidebarOpen,
+            navigationDepth: navigationPath.count
+        )
+    }
+
+    private func sidebarCloseSwipeAction(
+        for value: DragGesture.Value
+    ) -> RootNavigationSwipeAction? {
+        guard isSidebarOpen else {
+            return nil
+        }
+
+        let action = RootNavigationSwipePolicy.action(
+            startLocationX: value.startLocation.x,
+            translationWidth: value.translation.width,
+            translationHeight: value.translation.height,
+            isSidebarOpen: true,
+            navigationDepth: navigationPath.count
+        )
+
+        guard action == .closeSidebar else {
+            return nil
+        }
+
+        return action
     }
 
     // Uses the responder chain instead of per-view bindings so mixed SwiftUI/UIKit inputs all close together.

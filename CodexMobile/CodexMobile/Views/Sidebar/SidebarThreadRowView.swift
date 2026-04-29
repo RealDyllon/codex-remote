@@ -49,7 +49,7 @@ struct SidebarThreadRowView: View {
     // MARK: - Parent row (no CodexService dependency)
 
     private var parentRow: some View {
-        Button(action: { HapticFeedback.shared.triggerImpactFeedback(style: .light); onTap() }) {
+        Button(action: onTap) {
             HStack(alignment: .center, spacing: 8) {
                 leadingIndicatorSlot
 
@@ -127,7 +127,7 @@ struct SidebarThreadRowView: View {
     // MARK: - Subagent row (CodexService isolated in SubagentNameLabel)
 
     private var subagentRow: some View {
-        Button(action: { HapticFeedback.shared.triggerImpactFeedback(style: .light); onTap() }) {
+        Button(action: onTap) {
             HStack(alignment: .center, spacing: 8) {
                 leadingIndicatorSlot
 
