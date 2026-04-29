@@ -205,14 +205,9 @@ struct SidebarThreadListView: View {
                 toggleProjectGroupExpansion(group.id)
             } label: {
                 HStack(spacing: 8) {
-                    if group.iconSystemName == "arrow.triangle.branch" {
-                        CodexWorktreeIcon(pointSize: 16, weight: .medium)
-                            .foregroundStyle(.primary)
-                    } else {
-                        Image(systemName: group.iconSystemName)
-                            .font(AppFont.body(weight: .medium))
-                            .foregroundStyle(.primary)
-                    }
+                    Image(systemName: isExpanded ? "folder" : "text.under.folder")
+                        .font(AppFont.body(weight: .medium))
+                        .foregroundStyle(.primary)
                     Text(group.label)
                         .font(AppFont.body(weight: .medium))
                         .foregroundStyle(.primary)
