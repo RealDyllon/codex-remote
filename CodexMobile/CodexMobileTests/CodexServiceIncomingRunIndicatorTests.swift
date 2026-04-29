@@ -28,8 +28,8 @@ final class CodexServiceIncomingRunIndicatorTests: XCTestCase {
         let turnID = "turn-\(UUID().uuidString)"
         let itemID = "item-\(UUID().uuidString)"
 
-        service.enqueueAssistantDelta(threadId: threadID, turnId: turnID, itemId: itemID, delta: "Hello")
-        service.enqueueAssistantDelta(threadId: threadID, turnId: turnID, itemId: itemID, delta: " world")
+        service.appendAssistantDelta(threadId: threadID, turnId: turnID, itemId: itemID, delta: "Hello")
+        service.appendAssistantDelta(threadId: threadID, turnId: turnID, itemId: itemID, delta: " world")
 
         XCTAssertTrue(service.messages(for: threadID).isEmpty)
 
@@ -811,6 +811,29 @@ final class CodexServiceIncomingRunIndicatorTests: XCTestCase {
 
         XCTAssertEqual(assistantMessages[1].itemId, "item-2")
         XCTAssertEqual(assistantMessages[1].text, "Second")
+        XCTAssertTrue(assistantMessages[1].isStreaming)
+    }
+
+    func testAssistantStreamingKeepsRepeatedItemIDsSeparateAcrossTurns() {
+        let service = makeService()
+        let threadID = "thread-\(UUID().uuidString)"
+        let firstTurnID = "turn-\(UUID().uuidString)"
+        let secondTurnID = "turn-\(UUID().uuidString)"
+
+        service.appendAssistantDelta(threadId: threadID, turnId: firstTurnID, itemId: "item-2", delta: "First")
+        service.flushPendingAssistantDeltas(for: threadID, turnId: firstTurnID)
+        service.markTurnCompleted(threadId: threadID, turnId: firstTurnID)
+
+        service.appendAssistantDelta(threadId: threadID, turnId: secondTurnID, itemId: "item-2", delta: "Second")
+        service.flushPendingAssistantDeltas(for: threadID, turnId: secondTurnID)
+
+        let assistantMessages = service.messages(for: threadID).filter { $0.role == .assistant }
+        XCTAssertEqual(assistantMessages.count, 2)
+        XCTAssertEqual(Set(assistantMessages.map(\.id)).count, 2)
+        XCTAssertEqual(assistantMessages.map(\.turnId), [firstTurnID, secondTurnID])
+        XCTAssertEqual(assistantMessages.map { $0.itemId ?? "" }, ["item-2", "item-2"])
+        XCTAssertEqual(assistantMessages.map(\.text), ["First", "Second"])
+        XCTAssertFalse(assistantMessages[0].isStreaming)
         XCTAssertTrue(assistantMessages[1].isStreaming)
     }
 

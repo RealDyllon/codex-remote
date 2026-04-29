@@ -3605,9 +3605,11 @@ extension CodexService {
             return cachedIndex
         }
 
-        let rebuiltIndex = Dictionary(
-            uniqueKeysWithValues: messages.enumerated().map { ($0.element.id, $0.offset) }
-        )
+        var rebuiltIndex: [String: Int] = [:]
+        rebuiltIndex.reserveCapacity(messages.count)
+        for (offset, message) in messages.enumerated() {
+            rebuiltIndex[message.id] = offset
+        }
         messageIndexCacheByThread[threadId] = rebuiltIndex
         return rebuiltIndex[messageId]
     }

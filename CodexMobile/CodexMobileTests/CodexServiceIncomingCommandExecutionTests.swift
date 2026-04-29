@@ -199,6 +199,75 @@ final class CodexServiceIncomingCommandExecutionTests: XCTestCase {
         XCTAssertEqual(history[0].turnId, turnID)
     }
 
+    func testHistoryAssistantIDsAreScopedByTurnWhenItemIDsRepeat() {
+        let service = makeService()
+        let threadID = "thread-\(UUID().uuidString)"
+
+        let history = service.decodeMessagesFromThreadRead(
+            threadId: threadID,
+            threadObject: [
+                "createdAt": .string("2026-03-12T10:00:00Z"),
+                "turns": .array([
+                    .object([
+                        "id": .string("turn-1"),
+                        "items": .array([
+                            .object([
+                                "id": .string("item-2"),
+                                "type": .string("assistantMessage"),
+                                "message": .string("First response"),
+                            ]),
+                        ]),
+                    ]),
+                    .object([
+                        "id": .string("turn-2"),
+                        "items": .array([
+                            .object([
+                                "id": .string("item-2"),
+                                "type": .string("assistantMessage"),
+                                "message": .string("Second response"),
+                            ]),
+                        ]),
+                    ]),
+                ]),
+            ]
+        )
+
+        XCTAssertEqual(history.count, 2)
+        XCTAssertEqual(Set(history.map(\.id)).count, 2)
+        XCTAssertEqual(history.map(\.itemId), ["item-2", "item-2"])
+        XCTAssertEqual(history.map(\.turnId), ["turn-1", "turn-2"])
+        XCTAssertNotEqual(
+            CodexService.historyMessageKey(for: history[0]),
+            CodexService.historyMessageKey(for: history[1])
+        )
+    }
+
+    func testStableAssistantMessageIDUsesTurnWhenAvailable() {
+        let threadID = "thread-\(UUID().uuidString)"
+
+        let firstID = CodexService.stableAssistantMessageID(
+            threadId: threadID,
+            turnId: "turn-1",
+            itemId: "item-2"
+        )
+        let secondID = CodexService.stableAssistantMessageID(
+            threadId: threadID,
+            turnId: "turn-2",
+            itemId: "item-2"
+        )
+        let legacyID = CodexService.stableAssistantMessageID(
+            threadId: threadID,
+            turnId: nil,
+            itemId: "item-2"
+        )
+
+        XCTAssertEqual(firstID, "assistant:\(threadID):turn:turn-1:item:item-2")
+        XCTAssertEqual(secondID, "assistant:\(threadID):turn:turn-2:item:item-2")
+        XCTAssertEqual(legacyID, "assistant:\(threadID):item:item-2")
+        XCTAssertNotEqual(firstID, secondID)
+        XCTAssertNotEqual(firstID, legacyID)
+    }
+
     func testHistoryDecodesNumericStringMicrosecondTimestamps() {
         let service = makeService()
         let threadID = "thread-\(UUID().uuidString)"

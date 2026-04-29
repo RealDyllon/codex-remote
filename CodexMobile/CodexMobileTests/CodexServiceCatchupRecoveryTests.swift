@@ -173,6 +173,81 @@ final class CodexServiceCatchupRecoveryTests: XCTestCase {
         XCTAssertLessThanOrEqual(canonicalHistoryReadCount, 1)
     }
 
+    func testRecentHistoryWindowDropsMessagesAlreadyPresentInStablePrefix() throws {
+        let threadID = "thread-\(UUID().uuidString)"
+        let duplicateID = "assistant:\(threadID):turn:old-turn:item:item-2"
+        let now = Date()
+        let existing = (0..<40).map { index in
+            CodexMessage(
+                id: index == 0 ? duplicateID : "message-\(index)",
+                threadId: threadID,
+                role: .assistant,
+                text: "Existing \(index)",
+                createdAt: now.addingTimeInterval(Double(index)),
+                turnId: "turn-\(index)",
+                itemId: "item-\(index)",
+                isStreaming: false,
+                deliveryState: .confirmed,
+                orderIndex: index
+            )
+        }
+
+        let historyTail = [
+            CodexMessage(
+                id: duplicateID,
+                threadId: threadID,
+                role: .assistant,
+                text: "Existing 0",
+                createdAt: now.addingTimeInterval(100),
+                turnId: "old-turn",
+                itemId: "item-2",
+                isStreaming: false,
+                deliveryState: .confirmed,
+                orderIndex: 100
+            ),
+            CodexMessage(
+                id: "fresh-1",
+                threadId: threadID,
+                role: .assistant,
+                text: "Fresh 1",
+                createdAt: now.addingTimeInterval(101),
+                turnId: "fresh-turn-1",
+                itemId: "fresh-item-1",
+                isStreaming: false,
+                deliveryState: .confirmed,
+                orderIndex: 101
+            ),
+            CodexMessage(
+                id: "fresh-2",
+                threadId: threadID,
+                role: .assistant,
+                text: "Fresh 2",
+                createdAt: now.addingTimeInterval(102),
+                turnId: "fresh-turn-2",
+                itemId: "fresh-item-2",
+                isStreaming: false,
+                deliveryState: .confirmed,
+                orderIndex: 102
+            ),
+        ]
+        let history = Array(existing.dropLast(3)) + historyTail
+
+        let merged = try CodexService.mergeRecentHistoryWindow(
+            existing,
+            history,
+            activeThreadIDs: [threadID],
+            runningThreadIDs: [threadID],
+            windowSize: 3
+        )
+
+        let ids = merged.map(\.id)
+        XCTAssertEqual(ids.count, Set(ids).count)
+        XCTAssertEqual(ids.filter { $0 == duplicateID }.count, 1)
+        XCTAssertTrue(ids.contains("fresh-1"))
+        XCTAssertTrue(ids.contains("fresh-2"))
+        XCTAssertEqual(merged.first?.text, "Existing 0")
+    }
+
     private func makeService() -> CodexService {
         let suiteName = "CodexServiceCatchupRecoveryTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName) ?? .standard
