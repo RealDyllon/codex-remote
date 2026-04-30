@@ -26,6 +26,7 @@ struct ComposerBottomBar: View {
     let isThreadRunning: Bool
     let voiceButtonPresentation: TurnComposerVoiceButtonPresentation
     let onTapAddImage: () -> Void
+    let onTapAddFile: () -> Void
     let onTapTakePhoto: () -> Void
     let onTapVoice: () -> Void
     let onSetPlanModeArmed: (Bool) -> Void
@@ -174,9 +175,15 @@ struct ComposerBottomBar: View {
                 }
                 .disabled(remainingAttachmentSlots == 0)
 
-                Button("Take a photo") {
+                Button("Camera") {
                     HapticFeedback.shared.triggerImpactFeedback()
                     onTapTakePhoto()
+                }
+                .disabled(remainingAttachmentSlots == 0)
+
+                Button("File") {
+                    HapticFeedback.shared.triggerImpactFeedback()
+                    onTapAddFile()
                 }
                 .disabled(remainingAttachmentSlots == 0)
             }

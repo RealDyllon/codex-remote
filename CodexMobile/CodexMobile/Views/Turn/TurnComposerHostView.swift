@@ -149,6 +149,7 @@ struct TurnComposerHostView: View {
                 && !isWorktreeProject
                 && !viewModel.isCreatingGitWorktree,
             onTapAddImage: { viewModel.openPhotoLibraryPicker(codex: codex) },
+            onTapAddFile: { viewModel.openFilePicker(codex: codex) },
             onTapTakePhoto: { viewModel.openCamera(codex: codex) },
             onTapVoice: onTapVoice,
             onCancelVoiceRecording: onCancelVoiceRecording,

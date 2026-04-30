@@ -60,6 +60,7 @@ struct TurnComposerView: View {
     let onSelectAccessMode: (CodexAccessMode) -> Void
     let canHandOffToWorktree: Bool
     let onTapAddImage: () -> Void
+    let onTapAddFile: () -> Void
     let onTapTakePhoto: () -> Void
     let onTapVoice: () -> Void
     let onCancelVoiceRecording: () -> Void
@@ -166,6 +167,7 @@ struct TurnComposerView: View {
                     isThreadRunning: isThreadRunning,
                     voiceButtonPresentation: voiceButtonPresentation,
                     onTapAddImage: onTapAddImage,
+                    onTapAddFile: onTapAddFile,
                     onTapTakePhoto: onTapTakePhoto,
                     onTapVoice: onTapVoice,
                     onSetPlanModeArmed: onSetPlanModeArmed,
@@ -545,6 +547,7 @@ private struct QueuedDraftsPanelPreviewWrapper: View {
                 onSelectAccessMode: { _ in },
                 canHandOffToWorktree: false,
                 onTapAddImage: {},
+                onTapAddFile: {},
                 onTapTakePhoto: {},
                 onTapVoice: {},
                 onCancelVoiceRecording: {},

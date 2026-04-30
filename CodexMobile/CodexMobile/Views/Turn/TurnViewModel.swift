@@ -136,6 +136,7 @@ final class TurnViewModel {
     var shouldAnchorToAssistantResponse = false
     var isScrolledToBottom = true
     var isPhotoPickerPresented = false
+    var isFilePickerPresented = false
     var isCameraPresented = false
     var photoPickerItems: [PhotosPickerItem] = []
     var composerAttachments: [TurnComposerImageAttachment] = []
@@ -848,6 +849,15 @@ final class TurnViewModel {
         isPhotoPickerPresented = true
     }
 
+    func openFilePicker(codex: CodexService) {
+        guard remainingAttachmentSlots > 0 else {
+            codex.lastErrorMessage = "You can attach up to \(maxComposerImages) images per message."
+            return
+        }
+
+        isFilePickerPresented = true
+    }
+
     // Converts the picker results into loading slots and async image pipeline jobs.
     func enqueuePhotoPickerItems(_ items: [PhotosPickerItem], codex: CodexService) {
         guard !items.isEmpty else {
@@ -913,6 +923,42 @@ final class TurnViewModel {
 
             Task {
                 let state = Self.loadComposerAttachmentState(fromData: imageData)
+                await MainActor.run {
+                    self.updateComposerAttachment(id: attachmentID, state: state)
+                }
+            }
+        }
+    }
+
+    // Imports image files selected from the iOS Files app into the same normalized attachment pipeline.
+    func enqueueFilePickerURLs(_ urls: [URL], codex: CodexService) {
+        guard !urls.isEmpty else {
+            return
+        }
+
+        let intakePlan = TurnComposerAttachmentIntakePlan.make(
+            requestedCount: urls.count,
+            remainingSlots: remainingAttachmentSlots
+        )
+
+        guard intakePlan.acceptedCount > 0 else {
+            codex.lastErrorMessage = "You can attach up to \(maxComposerImages) images per message."
+            return
+        }
+
+        let acceptedItems = Array(urls.prefix(intakePlan.acceptedCount))
+        if intakePlan.hasOverflow {
+            codex.lastErrorMessage = "Only \(maxComposerImages) images are allowed per message."
+        }
+
+        clearComposerReviewSelectionIfNeededForNonReviewContent()
+
+        for url in acceptedItems {
+            let attachmentID = UUID().uuidString
+            composerAttachments.append(TurnComposerImageAttachment(id: attachmentID, state: .loading))
+
+            Task {
+                let state = await Self.loadComposerAttachmentState(fromFileURL: url)
                 await MainActor.run {
                     self.updateComposerAttachment(id: attachmentID, state: state)
                 }
@@ -1237,6 +1283,25 @@ final class TurnViewModel {
         do {
             guard let data = try await item.loadTransferable(type: Data.self),
                   !data.isEmpty else {
+                return .failed
+            }
+            return loadComposerAttachmentState(fromData: data)
+        } catch {
+            return .failed
+        }
+    }
+
+    private static func loadComposerAttachmentState(fromFileURL url: URL) async -> TurnComposerImageAttachmentState {
+        let didStartAccessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if didStartAccessing {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        do {
+            let data = try Data(contentsOf: url)
+            guard !data.isEmpty else {
                 return .failed
             }
             return loadComposerAttachmentState(fromData: data)
