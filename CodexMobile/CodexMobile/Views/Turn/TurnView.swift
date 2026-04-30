@@ -7,6 +7,7 @@
 import SwiftUI
 import PhotosUI
 import UIKit
+import UniformTypeIdentifiers
 
 struct TurnView: View {
     let thread: CodexThread
@@ -239,6 +240,13 @@ struct TurnView: View {
             matching: .images,
             preferredItemEncoding: .automatic
         )
+        .fileImporter(
+            isPresented: isFilePickerPresentedBinding,
+            allowedContentTypes: [.image],
+            allowsMultipleSelection: true
+        ) { result in
+            handleFilePickerResult(result)
+        }
         .turnViewLifecycle(
             taskID: thread.id,
             activeTurnID: activeTurnID,
@@ -813,6 +821,16 @@ struct TurnView: View {
         viewModel.photoPickerItems = []
     }
 
+    private func handleFilePickerResult(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            viewModel.enqueueFilePickerURLs(urls, codex: codex)
+        case .failure(let error):
+            let message = error.localizedDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+            codex.lastErrorMessage = message.isEmpty ? "Could not import the selected file." : message
+        }
+    }
+
     private func startAssistantRevertPreview(message: CodexMessage, gitWorkingDirectory: String?) {
         guard let gitWorkingDirectory,
               let changeSet = codex.readyChangeSet(forAssistantMessage: message),
@@ -1114,6 +1132,13 @@ struct TurnView: View {
         Binding(
             get: { viewModel.isPhotoPickerPresented },
             set: { viewModel.isPhotoPickerPresented = $0 }
+        )
+    }
+
+    private var isFilePickerPresentedBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.isFilePickerPresented },
+            set: { viewModel.isFilePickerPresented = $0 }
         )
     }
 
